@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AAIR Labs Portal — Design Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #F7F5F0;
+    --paper-deep: #EFEBE2;
+    --surface: #FFFFFF;
+    --ink: #0B0B0A;
+    --ink-70: #46453F;
+    --ink-45: #7A776E;
+    --line: #E0DCD2;
+    --green: #1D7A4C;
+    --green-tint: #E4F1E9;
+    --orange: #C4551D;
+    --orange-tint: #FAEBE0;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+    --pad: clamp(20px, 5vw, 64px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Layout primitives ---------- */
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 var(--pad); }
+
+  .rule { border: 0; border-top: 1px solid var(--line); }
+  .rule-heavy { border: 0; border-top: 2px solid var(--ink); }
+
+  section { padding: clamp(48px, 7vw, 88px) 0; }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-45);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .section-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  .section-head .idx {
+    font-family: var(--serif);
+    font-size: clamp(28px, 4vw, 40px);
+    color: var(--line);
+    line-height: 1;
+  }
+
+  h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  p.muted { color: var(--ink-70); max-width: 62ch; }
+
+  .grid { display: grid; gap: 24px; }
+  .g-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .g-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g-4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+  /* ---------- Masthead ---------- */
+  header.masthead {
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper);
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: 15px;
+  }
+
+  .mark {
+    width: 26px; height: 26px;
+    background: var(--ink);
+    color: var(--paper);
+    display: grid; place-items: center;
+    font-family: var(--serif);
+    font-size: 15px;
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .mark-xl {
+    width: clamp(96px, 14vw, 148px);
+    height: clamp(96px, 14vw, 148px);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .mark-xl img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .topnav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .topnav a {
+    color: var(--ink-70);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+  }
+  .topnav a:hover, .topnav a:focus-visible { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .hero { padding: clamp(48px, 8vw, 96px) 0 clamp(40px, 6vw, 72px); }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(44px, 8vw, 92px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    max-width: 16ch;
+  }
+
+  .hero h1 em { font-style: italic; }
+
+  .hero .kicker {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 26px;
+    flex-wrap: wrap;
+  }
+
+  .hero .lede {
+    margin-top: 28px;
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--ink-70);
+    max-width: 58ch;
+    line-height: 1.65;
+  }
+
+  .meta-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    border-top: 1px solid var(--ink);
+    margin-top: clamp(40px, 6vw, 64px);
+  }
+
+  .meta-strip div {
+    padding: 16px 20px 16px 0;
+    border-right: 1px solid var(--line);
+  }
+  .meta-strip div:last-child { border-right: 0; }
+  .meta-strip .k { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-45); font-weight: 600; }
+  .meta-strip .v { font-size: 14px; font-weight: 500; margin-top: 4px; }
+
+  /* ---------- Principles ---------- */
+  .principle {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--ink);
+    padding: 24px;
+    border-radius: 2px;
+  }
+  .principle .num { font-family: var(--serif); font-size: 30px; color: var(--ink-45); line-height: 1; }
+  .principle h4 { font-size: 15px; font-weight: 600; margin: 12px 0 8px; }
+  .principle p { font-size: 13.5px; color: var(--ink-70); }
+
+  /* ---------- Color ---------- */
+  .swatch {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .swatch .chip { height: 92px; border-bottom: 1px solid var(--line); }
+  .swatch .info { padding: 12px 14px 14px; }
+  .swatch .name { font-size: 13px; font-weight: 600; }
+  .swatch .hex { font-size: 12px; color: var(--ink-45); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .swatch .use { font-size: 12px; color: var(--ink-70); margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 8px; }
+
+  .ratio-bar {
+    display: flex;
+    height: 56px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 32px;
+  }
+  .ratio-bar span { display: grid; place-items: center; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; }
+  .ratio-paper { background: var(--paper); color: var(--ink-45); flex: 60; border-right: 1px solid var(--line); }
+  .ratio-surface { background: var(--surface); color: var(--ink-45); flex: 20; border-right: 1px solid var(--line); }
+  .ratio-ink { background: var(--ink); color: var(--paper); flex: 15; }
+  .ratio-accent { background: var(--green); color: #fff; flex: 5; }
+
+  /* ---------- Type ---------- */
+  .type-specimen {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: clamp(20px, 3vw, 32px);
+    border-radius: 2px;
+  }
+  .type-specimen .sample { line-height: 1.15; }
+  .type-specimen .meta {
+    display: flex; justify-content: space-between; gap: 16px;
+    border-top: 1px dashed var(--line);
+    margin-top: 18px; padding-top: 12px;
+    font-size: 11.5px; color: var(--ink-45);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    flex-wrap: wrap;
+  }
+  .s-display { font-family: var(--serif); font-size: clamp(40px, 6vw, 64px); font-weight: 400; letter-spacing: -0.02em; }
+  .s-h2 { font-family: var(--serif); font-size: clamp(28px, 4vw, 36px); font-weight: 400; }
+  .s-body { font-size: 16px; line-height: 1.7; color: var(--ink-70); }
+  .s-lead { font-size: 19px; line-height: 1.6; }
+  .s-ui { font-size: 14px; font-weight: 500; }
+  .s-over { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-45); }
+  .s-quote { font-family: var(--serif); font-style: italic; font-size: 24px; line-height: 1.4; }
+
+  /* ---------- Components ---------- */
+  .demo {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 28px;
+  }
+  .demo .demo-label {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-45); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .demo .demo-label::after { content: ""; flex: 1; border-top: 1px dashed var(--line); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 11px 22px;
+    border-radius: 2px;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  }
+  .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { background: #242320; }
+  .btn-accent { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn-accent:hover { background: #176740; }
+  .btn-secondary { background: transparent; color: var(--ink); }
+  .btn-secondary:hover { background: var(--paper-deep); }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--ink-70); }
+  .btn-ghost:hover { color: var(--ink); border-color: var(--line); }
+  .btn:disabled, .btn-disabled { opacity: 0.4; cursor: not-allowed; border-color: var(--ink-45); }
+  .btn-sm { padding: 7px 14px; font-size: 12.5px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+  .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .b-draft { color: var(--ink-45); border-color: var(--line); background: var(--paper); }
+  .b-pending { color: var(--ink); border-color: var(--ink); background: transparent; }
+  .b-review { color: var(--orange); border-color: var(--orange); background: var(--orange-tint); }
+  .b-approved { color: var(--green); border-color: var(--green); background: var(--green-tint); }
+  .b-published { color: #fff; border-color: var(--ink); background: var(--ink); }
+
+  .field { display: flex; flex-direction: column; gap: 7px; max-width: 340px; }
+  .field label { font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; }
+  .field input, .field select, .field textarea {
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 11px 13px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-bottom: 2px solid var(--ink-45);
+    border-radius: 2px;
+    color: var(--ink);
+  }
+  .field input::placeholder { color: var(--ink-45); }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-bottom-color: var(--ink);
+    background: var(--surface);
+  }
+  .field .hint { font-size: 12px; color: var(--ink-45); }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .card:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .card .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .card h4 { font-family: var(--serif); font-weight: 400; font-size: 21px; line-height: 1.2; }
+  .card p { font-size: 13.5px; color: var(--ink-70); }
+  .card .card-meta {
+    font-size: 11.5px; color: var(--ink-45);
+    text-transform: uppercase; letter-spacing: 0.09em; font-weight: 600;
+    display: flex; gap: 14px; flex-wrap: wrap;
+  }
+  .card .card-foot {
+    border-top: 1px solid var(--line);
+    padding-top: 12px; margin-top: auto;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    font-size: 13px;
+  }
+  .card .link {
+    color: var(--ink); font-weight: 600; font-size: 13px;
+    text-decoration: none; border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 1px;
+  }
+  .card .link:hover { color: var(--green); border-bottom-color: var(--green); }
+
+  .profile-card { text-align: left; }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--ink); color: var(--paper);
+    display: grid; place-items: center;
+    font-family: var(--serif); font-size: 22px;
+  }
+  .tag {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    padding: 4px 9px; border: 1px solid var(--line);
+    border-radius: 999px; color: var(--ink-70); background: var(--paper);
+  }
+
+  /* Stepper */
+  .stepper { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border: 1px solid var(--ink); border-radius: 2px; overflow: hidden; }
+  .step { padding: 18px 16px; background: var(--surface); border-right: 1px solid var(--line); position: relative; }
+  .step:last-child { border-right: 0; }
+  .step.done { background: var(--paper-deep); }
+  .step.active { background: var(--ink); color: var(--paper); }
+  .step .n { font-family: var(--serif); font-size: 26px; line-height: 1; opacity: 0.55; }
+  .step .t { font-size: 12px; font-weight: 600; margin-top: 8px; line-height: 1.35; letter-spacing: 0.01em; }
+  .step.active .n { opacity: 0.8; }
+
+  /* Table */
+  .table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 13.5px; }
+  .table th {
+    text-align: left; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-45); font-weight: 600; padding: 12px 14px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .table td { padding: 13px 14px; border-bottom: 1px solid var(--line); }
+  .table tr:hover td { background: var(--paper); }
+
+  /* Callout */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: var(--orange-tint);
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: var(--ink-70);
+    border-radius: 0 2px 2px 0;
+  }
+  .callout strong { color: var(--ink); }
+  .callout.green { border-left-color: var(--green); background: var(--green-tint); }
+
+  /* Do / Don't */
+  .dd { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 720px) { .dd { grid-template-columns: 1fr; } .stepper { grid-template-columns: 1fr 1fr; } .step { border-bottom: 1px solid var(--line); } }
+  .dd .box { background: var(--surface); border: 1px solid var(--line); padding: 22px; border-radius: 2px; }
+  .dd .box h4 { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; display: flex; gap: 8px; align-items: center; }
+  .dd .box ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .dd .box li { font-size: 13.5px; color: var(--ink-70); padding-left: 20px; position: relative; }
+  .dd .box li::before { position: absolute; left: 0; font-weight: 700; }
+  .dd .do li::before { content: "+"; color: var(--green); }
+  .dd .dont li::before { content: "\2212"; color: var(--orange); }
+  .dd .do h4 { color: var(--green); }
+  .dd .dont h4 { color: var(--orange); }
+
+  /* Footer */
+  footer {
+    background: var(--ink);
+    color: #C9C6BD;
+    padding: clamp(40px, 6vw, 64px) 0 40px;
+    margin-top: 40px;
+  }
+  footer .fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; margin-bottom: 40px; }
+  footer h5 { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #7A776E; margin-bottom: 14px; font-weight: 600; }
+  footer a { color: #C9C6BD; text-decoration: none; font-size: 13.5px; display: block; padding: 4px 0; }
+  footer a:hover { color: #fff; text-decoration: underline; }
+  footer .disclaimer { border-top: 1px solid #2B2A26; padding-top: 24px; font-size: 12px; line-height: 1.7; color: #8B887F; max-width: 90ch; }
+  footer .disclaimer + .disclaimer { margin-top: 14px; }
+  footer .fmark { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; margin-bottom: 18px; }
+  footer .fmark .mark { background: var(--paper); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="wordmark"><span class="mark"><img src="../AAIR%20Assets/AAIR%20Logo%20PFP.jpg" alt="" /></span> AAIR&nbsp;LABS <span style="color:var(--ink-45);font-weight:500;">/ Portal</span></div>
+      <nav class="topnav" aria-label="Sections">
+        <a href="#principles">Principles</a>
+        <a href="#color">Color</a>
+        <a href="#type">Type</a>
+        <a href="#components">Components</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#compliance">Compliance</a>
+      </nav>
+    </div>
+
+    <div class="hero">
+      <div class="mark-xl" style="margin-bottom:26px;">
+        <img src="../AAIR%20Assets/AAIR%20Logo%20PFP.jpg" alt="AAIR Labs logo profile picture" />
+      </div>
+      <div class="kicker">
+        <span class="label">Design Brief</span>
+        <span style="color:var(--line)">—</span>
+        <span class="label">v1.0</span>
+        <span style="color:var(--line)">—</span>
+        <span class="badge b-approved">Approved Direction</span>
+      </div>
+      <h1>Off-white paper, <em>black</em> ink, and nothing wasted.</h1>
+      <p class="lede">
+        A Swiss-editorial system for the AAIR Labs Centralized Web Portal. Generous whitespace,
+        a strict grid, serif display type against a neutral sans — with color reserved almost
+        entirely for state: green means go, orange means attention.
+      </p>
+
+      <div class="meta-strip">
+        <div><div class="k">Canvas</div><div class="v">Off-white #F7F5F0</div></div>
+        <div><div class="k">Ink</div><div class="v">Near-black #0B0B0A</div></div>
+        <div><div class="k">Display</div><div class="v">Instrument Serif</div></div>
+        <div><div class="k">Interface</div><div class="v">Inter</div></div>
+        <div><div class="k">Accent budget</div><div class="v">&le; 5% of surface</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ PRINCIPLES ============ -->
+<section id="principles">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Design Principles</h2>
+      <span class="idx">01</span>
+    </div>
+    <div class="grid g-4">
+      <div class="principle">
+        <div class="num">01</div>
+        <h4>Hierarchy through type, not color</h4>
+        <p>Size, weight and serif/sans contrast do the work. If a screen needs three colors to feel organized, the structure is wrong.</p>
+      </div>
+      <div class="principle">
+        <div class="num">02</div>
+        <h4>The grid is visible</h4>
+        <p>Hairline rules and column alignment echo a research paper's margins. Elements snap to an 8px baseline.</p>
+      </div>
+      <div class="principle">
+        <div class="num">03</div>
+        <h4>Color is a signal</h4>
+        <p>Green = approved / primary action. Orange = needs attention. Everything else is ink on paper. No decorative color.</p>
+      </div>
+      <div class="principle">
+        <div class="num">04</div>
+        <h4>Restrained motion</h4>
+        <p>120–150ms state transitions only. Cards lift 2px on hover; nothing animates on scroll. Respect reduced-motion.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ============ COLOR ============ -->
+<section id="color">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Color System</h2>
+      <span class="idx">02</span>
+    </div>
+
+    <div class="grid g-4">
+      <div class="swatch">
+        <div class="chip" style="background:#F7F5F0"></div>
+        <div class="info"><div class="name">Paper</div><div class="hex">#F7F5F0</div><div class="use">Page background</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#FFFFFF"></div>
+        <div class="info"><div class="name">Surface</div><div class="hex">#FFFFFF</div><div class="use">Cards, inputs, tables</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#0B0B0A"></div>
+        <div class="info"><div class="name">Ink</div><div class="hex">#0B0B0A</div><div class="use">Text, primary buttons, rules</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#46453F"></div>
+        <div class="info"><div class="name">Ink 70%</div><div class="hex">#46453F</div><div class="use">Body copy, secondary text</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#7A776E"></div>
+        <div class="info"><div class="name">Ink 45%</div><div class="hex">#7A776E</div><div class="use">Labels, placeholders, meta</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#E0DCD2"></div>
+        <div class="info"><div class="name">Line</div><div class="hex">#E0DCD2</div><div class="use">Hairline borders, dividers</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#1D7A4C"></div>
+        <div class="info"><div class="name">Signal Green</div><div class="hex">#1D7A4C</div><div class="use">Approved status, key CTAs</div></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#C4551D"></div>
+        <div class="info"><div class="name">Signal Orange</div><div class="hex">#C4551D</div><div class="use">Revision / attention states</div></div>
+      </div>
+    </div>
+
+    <div class="ratio-bar" role="img" aria-label="Color ratio: 60 percent paper, 20 percent surface, 15 percent ink, 5 percent accent">
+      <span class="ratio-paper">PAPER 60%</span>
+      <span class="ratio-surface">SURFACE 20%</span>
+      <span class="ratio-ink">INK 15%</span>
+      <span class="ratio-accent">5%</span>
+    </div>
+    <p class="muted" style="margin-top:14px;font-size:13px;">
+      The 60/20/15/5 rule keeps the portal calm. Green and orange only ever appear as badges, thin rules,
+      or a single CTA per view — never as large fills.
+    </p>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ============ TYPOGRAPHY ============ -->
+<section id="type">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Typography</h2>
+      <span class="idx">03</span>
+    </div>
+
+    <div class="grid" style="gap:16px;">
+      <div class="type-specimen">
+        <div class="sample s-display">Research, reviewed.</div>
+        <div class="meta"><span>Instrument Serif · Display · 64/1.1 · -2% tracking</span><span>Pages, heroes, section heads</span></div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="sample s-h2">Peer review &amp; publication</div>
+        <div class="meta"><span>Instrument Serif · H2 · 36/1.2</span><span>Card titles, subsections</span></div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="sample s-lead">AAIR Labs maintains a formal pipeline for student-written whitepapers, frameworks, and project proposals.</div>
+        <div class="meta"><span>Inter · Lead · 19/1.6 · 400</span><span>Intro paragraphs</span></div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="sample s-body">Body copy sits at 15–16px with a 1.65 line height and a comfortable 62ch measure. It should disappear while you read it — the content is the point, not the typeface.</div>
+        <div class="meta"><span>Inter · Body · 15/1.65 · 400</span><span>Long-form, descriptions</span></div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="sample s-quote">&ldquo;AAIR Labs Portal is published by Applied AI Research Labs at UTD, a registered student organization.&rdquo;</div>
+        <div class="meta"><span>Instrument Serif · Italic · 24/1.4</span><span>Pull quotes, disclaimers</span></div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="sample s-over">Under Review · RSO Compliance · Faculty</div>
+        <div class="meta"><span>Inter · Overline · 11/1.0 · 600 · +14% tracking</span><span>Labels, table heads, badges</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ============ COMPONENTS ============ -->
+<section id="components">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Components</h2>
+      <span class="idx">04</span>
+    </div>
+
+    <!-- Buttons -->
+    <div class="grid g-2" style="margin-bottom:24px;">
+      <div class="demo">
+        <div class="demo-label">Buttons</div>
+        <div class="row" style="margin-bottom:14px;">
+          <button class="btn btn-primary">Submit Proposal</button>
+          <button class="btn btn-secondary">Request Revisions</button>
+          <button class="btn btn-accent">Publish Paper</button>
+        </div>
+        <div class="row">
+          <button class="btn btn-ghost">Cancel</button>
+          <button class="btn btn-secondary btn-sm">Assign Reviewer</button>
+          <button class="btn btn-primary btn-sm">Approve</button>
+          <button class="btn btn-secondary" disabled>Reject</button>
+        </div>
+        <p class="muted" style="font-size:12.5px;margin-top:16px;">
+          Black is the default action. Green appears only on the single most important
+          forward action of a view. 2px radius, never pill-shaped.
+        </p>
+      </div>
+
+      <!-- Badges -->
+      <div class="demo">
+        <div class="demo-label">Status Badges</div>
+        <div class="row" style="margin-bottom:16px;">
+          <span class="badge b-draft">Draft</span>
+          <span class="badge b-pending">Pending</span>
+          <span class="badge b-review">Revision Requested</span>
+          <span class="badge b-approved">Approved</span>
+          <span class="badge b-published">Published</span>
+        </div>
+        <p class="muted" style="font-size:12.5px;">
+          Mirrors <code>proposal_status</code> and <code>paper_status</code> enums from the TRD.
+          Dot + uppercase label; color always paired with text so it survives colorblindness
+          and grayscale printing.
+        </p>
+      </div>
+    </div>
+
+    <!-- Forms -->
+    <div class="grid g-2" style="margin-bottom:24px;">
+      <div class="demo">
+        <div class="demo-label">Form Inputs</div>
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div class="field">
+            <label for="db-title">Project Title</label>
+            <input id="db-title" type="text" placeholder="e.g. Retrieval-Augmented Tutoring" />
+            <span class="hint">Shown on your public portfolio once approved.</span>
+          </div>
+          <div class="field">
+            <label for="db-domain">Target Domain</label>
+            <select id="db-domain">
+              <option>Natural Language Processing</option>
+              <option>Computer Vision</option>
+              <option>Reinforcement Learning</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo-label">Callouts &amp; Feedback</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="callout">
+            <strong>Director requested revisions.</strong> Strengthen the evaluation section and re-upload your PDF draft before resubmitting.
+          </div>
+          <div class="callout green">
+            <strong>Proposal approved.</strong> You can now submit your Project Status Paper and initial draft.
+          </div>
+          <div class="field">
+            <label for="db-feedback">Reviewer Notes</label>
+            <textarea id="db-feedback" rows="3" placeholder="Section 3 needs a clearer baseline comparison…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="demo" style="margin-bottom:24px;">
+      <div class="demo-label">Cards — Event, Paper, Researcher</div>
+      <div class="grid g-3">
+        <article class="card">
+          <div class="card-top">
+            <span class="tag">Workshop</span>
+            <span class="card-meta">Oct 17</span>
+          </div>
+          <h4>Intro to RAG Systems</h4>
+          <p>Hands-on session on retrieval pipelines, chunking strategies, and evaluation.</p>
+          <div class="card-meta"><span>7:00 PM</span><span>JO 4.122</span></div>
+          <div class="card-foot">
+            <span style="color:var(--ink-45);font-size:12.5px;">24 seats left</span>
+            <a class="link" href="#">Register &rarr;</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-top">
+            <span class="badge b-published">Published</span>
+          </div>
+          <h4>Efficient Fine-Tuning on Consumer GPUs</h4>
+          <p>A practical comparison of LoRA adapters across three 7B-parameter models.</p>
+          <div class="card-meta"><span>Whitepaper</span><span>v3 · 14 pp.</span></div>
+          <div class="card-foot">
+            <span style="color:var(--ink-45);font-size:12.5px;">M. Alvarez et al.</span>
+            <a class="link" href="#">Read PDF &rarr;</a>
+          </div>
+        </article>
+
+        <article class="card profile-card">
+          <div style="display:flex;gap:14px;align-items:center;">
+            <div class="avatar">J</div>
+            <div>
+              <h4 style="font-size:19px;">Jordan Lee</h4>
+              <div class="card-meta" style="margin-top:3px;">B.S. Computer Science · '27</div>
+            </div>
+          </div>
+          <p>Working on multimodal retrieval and evaluation harnesses for agentic systems.</p>
+          <div class="row" style="gap:8px;">
+            <span class="tag">NLP</span>
+            <span class="tag">LLM Agents</span>
+            <span class="tag">Eval</span>
+          </div>
+          <div class="card-foot">
+            <span style="color:var(--ink-45);font-size:12.5px;">3 papers · 1 project</span>
+            <a class="link" href="#">/researchers/jordan &rarr;</a>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="demo">
+      <div class="demo-label">Data Table — Admin Roster</div>
+      <div style="overflow-x:auto;">
+        <table class="table">
+          <thead>
+            <tr><th>Member</th><th>Role</th><th>Major</th><th>Onboarding</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Priya Nair</strong><br /><span style="color:var(--ink-45);font-size:12.5px;">priya@utdallas.edu</span></td>
+              <td>Director</td>
+              <td>Computer Science</td>
+              <td>Complete</td>
+              <td><span class="badge b-approved">Approved</span></td>
+            </tr>
+            <tr>
+              <td><strong>Sam Okafor</strong><br /><span style="color:var(--ink-45);font-size:12.5px;">sam@utdallas.edu</span></td>
+              <td>Student</td>
+              <td>Data Science</td>
+              <td>Step 2 of 3</td>
+              <td><span class="badge b-pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td><strong>Elena Ruiz</strong><br /><span style="color:var(--ink-45);font-size:12.5px;">elena@utdallas.edu</span></td>
+              <td>Student</td>
+              <td>Software Engineering</td>
+              <td>Complete</td>
+              <td><span class="badge b-review">Revision</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ============ PIPELINE ============ -->
+<section id="pipeline">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Approval Pipeline UI</h2>
+      <span class="idx">05</span>
+    </div>
+
+    <p class="muted" style="margin-bottom:28px;">
+      The 5-step lifecycle from the PRD, rendered as a horizontal stepper. Current step is inverted (ink);
+      completed steps tint the paper; upcoming steps stay white.
+    </p>
+
+    <div class="stepper" role="list" aria-label="Paper approval pipeline">
+      <div class="step done" role="listitem"><div class="n">1</div><div class="t">Proposal Submission</div></div>
+      <div class="step done" role="listitem"><div class="n">2</div><div class="t">Director Approval</div></div>
+      <div class="step active" role="listitem"><div class="n">3</div><div class="t">Status Paper &amp; Draft Upload</div></div>
+      <div class="step" role="listitem"><div class="n">4</div><div class="t">Peer Review</div></div>
+      <div class="step" role="listitem"><div class="n">5</div><div class="t">Final Approval &amp; Publication</div></div>
+    </div>
+
+    <div class="grid g-3" style="margin-top:28px;">
+      <div class="callout green"><strong>Approved state:</strong> tinted background, green badge, next action surfaced.</div>
+      <div class="callout"><strong>Attention state:</strong> orange left-rule and tint — used for revision requests only.</div>
+      <div class="callout" style="border-left-color:var(--ink-45);background:var(--paper-deep);"><strong>Neutral state:</strong> plain paper, muted label — waiting on an upstream step.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ============ DO / DON'T ============ -->
+<section id="rules">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Usage Rules</h2>
+      <span class="idx">06</span>
+    </div>
+    <div class="dd">
+      <div class="box do">
+        <h4>Do</h4>
+        <ul>
+          <li>Use hairline 1px rules and 2px ink rules to separate sections, like a printed journal.</li>
+          <li>Set serif display type at large sizes with tight leading; let it carry the personality.</li>
+          <li>Pair every color-coded status with a text label.</li>
+          <li>Keep 8px spacing rhythm and a 62ch max measure for body text.</li>
+          <li>Reserve green for the single most important action on the screen.</li>
+          <li>Ensure WCAG 2.1 AA contrast — all ink/paper pairings here pass at 4.5:1 or better.</li>
+        </ul>
+      </div>
+      <div class="box dont">
+        <h4>Don't</h4>
+        <ul>
+          <li>Don't fill hero sections or sidebars with green or orange.</li>
+          <li>Don't use drop shadows on cards — a border and 2px lift are enough.</li>
+          <li>Don't introduce a third typeface or round corners past 4px.</li>
+          <li>Don't use color as the only indicator of pipeline state.</li>
+          <li>Don't use official UTD trademarks or logos without university sponsorship.</li>
+          <li>Don't animate on scroll; motion is limited to hover and focus states.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer id="compliance">
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <div class="fmark"><span class="mark"><img src="../AAIR%20Assets/AAIR%20Logo%20PFP%20Inverted.jpg" alt="" /></span> AAIR LABS</div>
+        <p style="font-size:13px;color:#8B887F;max-width:34ch;">
+          Applied AI Research Labs at UT Dallas — the centralized portal for research,
+          membership, and events.
+        </p>
+      </div>
+      <div>
+        <h5>Explore</h5>
+        <a href="#">Public Library</a>
+        <a href="#">Event Calendar</a>
+        <a href="#">Researchers</a>
+        <a href="#">About the Org</a>
+      </div>
+      <div>
+        <h5>Members</h5>
+        <a href="#">Sign In</a>
+        <a href="#">Onboarding</a>
+        <a href="#">Submit a Proposal</a>
+        <a href="#">Account Settings</a>
+      </div>
+      <div>
+        <h5>Legal</h5>
+        <a href="#">Accessibility</a>
+        <a href="#">Privacy</a>
+        <a href="#">RSO Disclaimer</a>
+      </div>
+    </div>
+
+    <p class="disclaimer">
+      AAIR Labs Portal is published by Applied AI Research Labs at UTD, a registered student organization.
+      It is not an official publication of UT Dallas and does not represent the views of the university or
+      its officers. The University of Texas at Dallas is an Equal Opportunity/Affirmative Action University.
+    </p>
+    <p class="disclaimer">
+      Students with disabilities needing special assistance to attend please call (972-883-6551).
+      Texas Relay Operation: 1-800-RELAYTX.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
