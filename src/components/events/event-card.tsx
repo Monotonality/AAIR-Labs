@@ -1,6 +1,5 @@
 import { CalendarDays, MapPin, Link2 } from "lucide-react";
 import Link from "next/link";
-import { CATEGORY_LABELS } from "@/lib/events";
 import type { EventItem } from "@/lib/types";
 
 export function formatEventDate(iso: string) {
@@ -13,10 +12,7 @@ export function formatEventDate(iso: string) {
 export function EventCard({ event }: { event: EventItem }) {
   return (
     <article className="flex flex-col gap-3 rounded-[2px] border border-line bg-surface p-5 transition-[border-color,transform] duration-150 hover:-translate-y-0.5 hover:border-ink">
-      <div className="flex items-start justify-between gap-3">
-        <span className="rounded-full border border-line bg-paper px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-ink-70">
-          {CATEGORY_LABELS[event.category]}
-        </span>
+      <div className="flex items-start justify-end gap-3">
         <time
           dateTime={event.event_date}
           className="text-[11.5px] font-semibold uppercase tracking-wider text-ink-45"

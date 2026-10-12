@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, ChevronDown } from "lucide-react";
 
@@ -11,28 +12,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/client";
+import {
+  GRAD_SEMESTERS,
+  type GradSemester,
+  formatGradTerm,
+  gradYearOptions,
+  parseGradTerm,
+} from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["Application", "Org Intro", "Get Connected"];
-
-const SLIDES = [
-  {
-    title: "Who we are",
-    body: "AAIR Labs is a UT Dallas organization built around hands-on AI research: students learn the process of research, write papers, peer review, and publish.",
-  },
-  {
-    title: "How research flows",
-    body: "Every project starts as a proposal, passes director approval, gets a status paper and drafts, then moves through peer review to final publication.",
-  },
-  {
-    title: "Using the portal",
-    body: "This site manages primary activity: submit proposals, upload PDF drafts, respond to reviewer notes, and manage your portfolio from one place.",
-  },
-  {
-    title: "Events & community",
-    body: "Workshops, guest speakers, open research meetings, and headshot sessions: watch the calendar for what's next and register when seats are limited.",
-  },
-];
+const SELECT_CLASS =
+  "h-9 w-full rounded-md border border-line bg-paper px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink/20";
 
 const BRANDING_TASKS: {
   label: string;
@@ -53,14 +43,11 @@ const BRANDING_TASKS: {
   },
   { label: "Download your LinkedIn banner assets" },
   {
-    label: "Add \u201cAffiliate Researcher at AAIR Labs\u201d to your LinkedIn headline/experience",
+    label: "Add “Affiliate Researcher at AAIR Labs” to your LinkedIn headline/experience",
     image: {
       src: "/linkedin-experience-example.png",
       alt: "Example LinkedIn Experience entry for Affiliate Researcher at AAIR Labs",
     },
-  },
-  {
-    label: "Reach out to Director of Marketing to get a headshot at the next event",
   },
 ];
 
@@ -70,13 +57,22 @@ interface OnboardingData {
   personalEmail: string;
   major: string;
   expectedGradDate: string;
+  university: string;
   bio: string;
 }
 
-export function OnboardingWizard() {
+export function OnboardingWizard({ signedIn = false }: { signedIn?: boolean }) {
   const router = useRouter();
+  // Keep the account step for this visit even after the session cookie lands.
+  const [includeAccount] = useState(() => !signedIn);
+  const [hasAccount, setHasAccount] = useState(signedIn);
+  const [password, setPassword] = useState("");
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [step, setStep] = useState(0);
-  const [slide, setSlide] = useState(0);
+  const steps = includeAccount ? ["Account", "Application", "Get Connected"] : ["Application", "Get Connected"];
+  const applicationStep = includeAccount ? 1 : 0;
+  const connectStep = includeAccount ? 2 : 1;
+
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tasksChecked, setTasksChecked] = useState<Record<number, boolean>>({});
@@ -87,6 +83,7 @@ export function OnboardingWizard() {
     personalEmail: "",
     major: "",
     expectedGradDate: "",
+    university: "The University of Texas at Dallas",
     bio: "",
   });
 
@@ -108,6 +105,37 @@ export function OnboardingWizard() {
       active = false;
     };
   }, []);
+
+  async function createAccount() {
+    setError(null);
+    setIsCreatingAccount(true);
+
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: data.fullName,
+        email: data.email,
+        password,
+      }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.session) {
+      setError(
+        result.error ??
+          "Unable to create your account. If you already have one, sign in and come back.",
+      );
+      setIsCreatingAccount(false);
+      return;
+    }
+
+    setPassword("");
+    setHasAccount(true);
+    setIsCreatingAccount(false);
+    setStep(applicationStep);
+  }
 
   async function completeOnboarding() {
     setError(null);
@@ -138,16 +166,24 @@ export function OnboardingWizard() {
   const allTasksChecked =
     Object.keys(tasksChecked).length === BRANDING_TASKS.length;
 
+  const gradTerm = parseGradTerm(data.expectedGradDate);
+  const gradYears = gradYearOptions();
+
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <ol className="mb-10 grid grid-cols-3 border border-ink">
-        {STEPS.map((label, i) => {
-          const done = i < step || (i === 2 && step === 2);
+      <ol
+        className={cn(
+          "mb-10 grid border border-ink",
+          steps.length === 4 ? "grid-cols-4" : "grid-cols-3",
+        )}
+      >
+        {steps.map((label, i) => {
+          const done = i < step;
           return (
             <li
               key={label}
               className={cn(
-                "border-r border-line p-4 last:border-r-0",
+                "border-r border-line p-3 last:border-r-0 sm:p-4",
                 i === step ? "bg-ink text-paper" : done ? "bg-paper-deep" : "",
               )}
             >
@@ -166,8 +202,65 @@ export function OnboardingWizard() {
         </Alert>
       )}
 
-      {/* Step 1 - Application */}
-      {step === 0 && (
+      {includeAccount && step === 0 && (
+        <div className="space-y-6">
+          <p className="text-sm leading-relaxed text-ink-70">
+            Create your account first. You&apos;ll use this email and password
+            to sign in, then finish the rest of onboarding here.
+          </p>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="accountName">Full name</Label>
+              <Input
+                id="accountName"
+                autoComplete="name"
+                value={data.fullName}
+                onChange={(e) =>
+                  setData((d) => ({ ...d, fullName: e.target.value }))
+                }
+                placeholder="Your name"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="accountEmail">UTD email</Label>
+              <Input
+                id="accountEmail"
+                type="email"
+                autoComplete="email"
+                value={data.email}
+                onChange={(e) =>
+                  setData((d) => ({ ...d, email: e.target.value }))
+                }
+                placeholder="you@utdallas.edu"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="accountPassword">Password</Label>
+              <Input
+                id="accountPassword"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+              />
+            </div>
+          </div>
+          <p className="text-sm text-ink-70">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login?next=/onboarding"
+              className="font-semibold underline-offset-4 hover:underline"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+      )}
+
+      {/* Application */}
+      {step === applicationStep && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="space-y-1.5">
@@ -191,6 +284,7 @@ export function OnboardingWizard() {
                   setData((d) => ({ ...d, email: e.target.value }))
                 }
                 placeholder="you@utdallas.edu"
+                readOnly={includeAccount && hasAccount}
               />
             </div>
             <div className="space-y-1.5">
@@ -217,14 +311,62 @@ export function OnboardingWizard() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="grad">Expected graduation</Label>
+              <Label htmlFor="gradSemester">Expected graduation</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  id="gradSemester"
+                  value={gradTerm.semester}
+                  onChange={(e) =>
+                    setData((d) => ({
+                      ...d,
+                      expectedGradDate: formatGradTerm(
+                        e.target.value as GradSemester,
+                        parseGradTerm(d.expectedGradDate).year,
+                      ),
+                    }))
+                  }
+                  className={SELECT_CLASS}
+                >
+                  {GRAD_SEMESTERS.map((semester) => (
+                    <option key={semester} value={semester}>
+                      {semester}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label="Graduation year"
+                  value={gradTerm.year}
+                  onChange={(e) =>
+                    setData((d) => ({
+                      ...d,
+                      expectedGradDate: formatGradTerm(
+                        parseGradTerm(d.expectedGradDate).semester,
+                        e.target.value,
+                      ),
+                    }))
+                  }
+                  className={SELECT_CLASS}
+                >
+                  <option value="" disabled>
+                    Year
+                  </option>
+                  {gradYears.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="university">University</Label>
               <Input
-                id="grad"
-                value={data.expectedGradDate}
+                id="university"
+                value={data.university}
                 onChange={(e) =>
-                  setData((d) => ({ ...d, expectedGradDate: e.target.value }))
+                  setData((d) => ({ ...d, university: e.target.value }))
                 }
-                placeholder="2027"
+                placeholder="The University of Texas at Dallas"
               />
             </div>
           </div>
@@ -244,57 +386,10 @@ export function OnboardingWizard() {
         </div>
       )}
 
-      {/* Step 2 - Org intro slides */}
-      {step === 1 && (
-        <div className="border-2 border-ink bg-surface p-8 sm:p-10">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-45">
-            Org introduction {slide + 1} / {SLIDES.length}
-          </p>
-          <h2 className="mb-4 font-serif text-3xl leading-tight">
-            {SLIDES[slide].title}
-          </h2>
-          <p className="leading-relaxed text-ink-70">{SLIDES[slide].body}</p>
 
-          <div className="mt-8 flex items-center justify-between">
-            <Button
-              variant="secondary"
-              onClick={() => setSlide((s) => (s - 1 + SLIDES.length) % SLIDES.length)}
-            >
-              <ArrowLeft className="size-4" />
-              Back
-            </Button>
-            {slide === SLIDES.length - 1 ? (
-              <Button onClick={() => setStep(2)}>Continue</Button>
-            ) : (
-              <Button onClick={() => setSlide((s) => (s + 1) % SLIDES.length)}>
-                Next <ArrowRight className="size-4" />
-              </Button>
-            )}
-          </div>
 
-          <div
-            className="mt-6 flex gap-1.5"
-            role="tablist"
-            aria-label="Intro slides"
-          >
-            {SLIDES.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setSlide(i)}
-                aria-label={`Slide ${i + 1}`}
-                className={cn(
-                  "h-1 flex-1 transition-colors",
-                  i === slide ? "bg-ink" : "bg-line",
-                )}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Step 3 - Get connected */}
-      {step === 2 && (
+      {/* Get connected */}
+      {step === connectStep && (
         <div className="space-y-6">
           <p className="text-sm leading-relaxed text-ink-70">
             Get connected with the lab community: join the group chat, follow
@@ -405,7 +500,7 @@ export function OnboardingWizard() {
       )}
 
       <div className="mt-10 flex items-center justify-between border-t border-line pt-6">
-        {step > 0 ? (
+        {step > (includeAccount && hasAccount ? 1 : 0) ? (
           <Button
             variant="ghost"
             onClick={() => setStep((s) => s - 1)}
@@ -418,25 +513,37 @@ export function OnboardingWizard() {
           <span />
         )}
 
-        {step === 0 && (
+        {includeAccount && step === 0 && (
           <Button
-            onClick={() => setStep(1)}
+            onClick={createAccount}
+            disabled={
+              isCreatingAccount ||
+              !data.fullName.trim() ||
+              !data.email.trim() ||
+              password.length < 8
+            }
+          >
+            {isCreatingAccount ? "Creating account…" : "Continue"}{" "}
+            {!isCreatingAccount && <ArrowRight className="size-4" />}
+          </Button>
+        )}
+
+        {step === applicationStep && (
+          <Button
+            onClick={() => setStep(connectStep)}
             disabled={
               !data.fullName.trim() ||
               !data.email.trim() ||
               !data.personalEmail.trim() ||
-              !data.major.trim()
+              !data.major.trim() ||
+              !data.university.trim()
             }
           >
             Continue <ArrowRight className="size-4" />
           </Button>
         )}
 
-        {step === 1 && (
-          <Button onClick={() => setStep(2)}>Continue</Button>
-        )}
-
-        {step === 2 && (
+        {step === connectStep && (
           <Button onClick={completeOnboarding} disabled={!allTasksChecked || isSubmitting}>
             {isSubmitting ? "Finishing…" : "Complete onboarding"}
           </Button>

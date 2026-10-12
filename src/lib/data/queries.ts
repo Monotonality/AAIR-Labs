@@ -1,5 +1,11 @@
 import { cache } from "react";
-import type { EventItem, Profile, Project } from "@/lib/types";
+import type {
+  Application,
+  EventItem,
+  ExternalReading,
+  Profile,
+  Project,
+} from "@/lib/types";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/server";
 import { SAMPLE_AUTHORS, SAMPLE_EVENTS, SAMPLE_PAPERS } from "@/lib/data/samples";
 
@@ -42,6 +48,58 @@ export async function getEvents(): Promise<EventItem[]> {
 
   if (error) return [];
   return (data as EventItem[]) ?? [];
+}
+
+export async function getExternalReadings(): Promise<ExternalReading[]> {
+  if (!hasSupabaseEnv()) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("external_readings")
+    .select("*")
+    .order("updated_at", { ascending: false });
+
+  if (error) return [];
+  return (data as ExternalReading[]) ?? [];
+}
+
+/** True when onboarding is finished and a director has approved membership. */
+export async function isApprovedMember(profileId: string): Promise<boolean> {
+  if (!hasSupabaseEnv()) return false;
+
+  const supabase = await createClient();
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (profileError || !profile?.onboarding_completed) return false;
+
+  const { data: application, error: applicationError } = await supabase
+    .from("applications")
+    .select("id")
+    .eq("profile_id", profileId)
+    .eq("status", "approved")
+    .limit(1)
+    .maybeSingle();
+
+  if (applicationError) return false;
+  return Boolean(application);
+}
+
+export async function getApplications(): Promise<Application[]> {
+  if (!hasSupabaseEnv()) return [];
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("applications")
+    .select("*, applicant:profiles(*)")
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
+  return (data as Application[]) ?? [];
 }
 
 export async function getResearchers(): Promise<Profile[]> {
@@ -94,7 +152,47 @@ export const getProfileByUsername = cache(async function getProfileByUsername(
     .from("projects")
     .select("*, author:profiles(*), draft:paper_drafts(*)")
     .eq("author_id", profile.id)
-    .eq("status", "approved");
+    .order("created_at", { ascending: false });
+
+  return {
+    profile: profile as Profile,
+    papers: (papers as Project[]) ?? [],
+  };
+});
+
+export const getProfileById = cache(async function getProfileById(
+  id: string,
+): Promise<{
+  profile: Profile | null;
+  papers: Project[];
+}> {
+  if (!hasSupabaseEnv()) {
+    const profile = SAMPLE_AUTHORS.find((p) => p.id === id) ?? null;
+    return {
+      profile,
+      papers: profile
+        ? SAMPLE_PAPERS.filter((p) => p.author_id === profile.id)
+        : [],
+    };
+  }
+
+  const supabase = await createClient();
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !profile) {
+    return { profile: null, papers: [] };
+  }
+
+  const { data: papers } = await supabase
+    .from("projects")
+    .select("*, author:profiles(*), draft:paper_drafts(*)")
+    .eq("author_id", profile.id)
+    .order("created_at", { ascending: false });
 
   return {
     profile: profile as Profile,

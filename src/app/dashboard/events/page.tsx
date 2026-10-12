@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/events/event-card";
 import { getEvents } from "@/lib/data/queries";
-import { CATEGORY_LABELS } from "@/lib/events";
 
 export const metadata: Metadata = {
   title: "Events · Dashboard",
@@ -36,7 +35,6 @@ export default async function AdminEventsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead>Category</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Location</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -47,9 +45,6 @@ export default async function AdminEventsPage() {
               <TableRow key={event.id}>
                 <TableCell className="max-w-[260px] font-medium">
                   {event.title}
-                </TableCell>
-                <TableCell className="text-ink-70">
-                  {CATEGORY_LABELS[event.category]}
                 </TableCell>
                 <TableCell className="text-ink-70">
                   {new Date(event.event_date).toLocaleDateString()}

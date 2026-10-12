@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 
-import { PageHeader } from "@/components/shared/section-heading";
+import { ExternalReadingList } from "@/components/library/external-reading-list";
 import { LibrarySearch } from "@/components/library/library-search";
-import { getPublishedPapers } from "@/lib/data/queries";
+import { getExternalReadings, getPublishedPapers } from "@/lib/data/queries";
 
 export const instant = false;
 
@@ -11,17 +12,27 @@ export const metadata: Metadata = {
 };
 
 export default async function LibraryPage() {
-  const papers = await getPublishedPapers();
+  await connection();
+  const [papers, readings] = await Promise.all([
+    getPublishedPapers(),
+    getExternalReadings(),
+  ]);
 
   return (
     <>
-      <PageHeader
-        kicker="Public library"
-        title="Whitepapers & technical frameworks"
-        description="Every published paper here passed director approval and peer review. Each entry links back to its author's portfolio."
-      />
-      <section className="mx-auto w-full max-w-6xl space-y-6 px-4 py-12 sm:px-6">
+      <div className="border-b border-line bg-paper">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-6 pt-10 sm:px-6 sm:pt-12">
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-45">
+            Publications
+          </p>
+          <h1 className="font-serif text-3xl leading-tight tracking-tight text-ink sm:text-4xl">
+            Papers & External Reading
+          </h1>
+        </div>
+      </div>
+      <section className="mx-auto w-full max-w-6xl space-y-12 px-4 py-12 sm:px-6">
         <LibrarySearch papers={papers} />
+        <ExternalReadingList readings={readings} />
       </section>
     </>
   );

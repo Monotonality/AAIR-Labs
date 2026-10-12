@@ -16,9 +16,9 @@ export const footerNav: Record<string, NavItem[]> = {
     { href: "/researchers", label: "Researchers" },
   ],
   members: [
-    { href: "/onboarding", label: "Onboarding" },
-    { href: "/auth/login", label: "Sign In" },
+    { href: "/portal", label: "Portal" },
     { href: "/settings/account", label: "Account Settings" },
+    { href: "/auth/login", label: "Sign In" },
   ],
   legal: [
     { href: "/accessibility", label: "Accessibility" },

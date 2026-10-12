@@ -23,7 +23,7 @@ export async function SiteHeader() {
   const authArea = isAuthed ? (
     <>
       <Button asChild variant="ghost" size="sm">
-        <Link href="/dashboard">Dashboard</Link>
+        <Link href="/portal">Portal</Link>
       </Button>
       <SignOutButton />
     </>
@@ -33,7 +33,7 @@ export async function SiteHeader() {
         <Link href="/auth/login">Sign in</Link>
       </Button>
       <Button asChild size="sm">
-        <Link href="/onboarding">Join</Link>
+        <Link href="/auth/signup">Join</Link>
       </Button>
     </>
   );
@@ -45,7 +45,6 @@ export async function SiteHeader() {
           <BrandLogo size="sm" />
           <span className="text-sm font-bold tracking-tight">
             AAIR&nbsp;LABS
-            <span className="ml-1.5 font-medium text-ink-45">/ Portal</span>
           </span>
         </Link>
 

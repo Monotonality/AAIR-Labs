@@ -18,6 +18,7 @@ export const instant = false;
 export async function generateMetadata({
   params,
 }: PageProps<"/researchers/[username]">): Promise<Metadata> {
+  await connection();
   const { username } = await params;
   const { profile } = await getProfileByUsername(username);
   return { title: profile?.full_name ?? "Researcher" };

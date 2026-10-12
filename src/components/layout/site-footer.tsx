@@ -13,7 +13,7 @@ export function SiteFooter() {
               <span className="font-bold text-white">AAIR&nbsp;LABS</span>
             </div>
             <p className="max-w-[30ch] text-sm leading-relaxed">
-              Applied AI Research Labs at UT Dallas — research, membership, and
+              Applied AI Research Labs at UT Dallas. Research, membership, and
               events in one place.
             </p>
           </div>

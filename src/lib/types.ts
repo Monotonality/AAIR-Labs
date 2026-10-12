@@ -6,6 +6,29 @@ export type ProposalStatus =
   | "rejected"
   | "revision_requested";
 
+export type ApplicationStatus = "pending" | "approved" | "rejected";
+
+export interface ApplicationFormData {
+  fullName?: string;
+  email?: string;
+  personalEmail?: string | null;
+  major?: string | null;
+  expectedGradDate?: string | null;
+  university?: string | null;
+  bio?: string | null;
+}
+
+export interface Application {
+  id: string;
+  profile_id: string;
+  form_data: ApplicationFormData;
+  status: ApplicationStatus;
+  director_notes: string | null;
+  created_at: string;
+  updated_at: string;
+  applicant?: Profile | null;
+}
+
 export type PaperStatus =
   | "draft"
   | "under_review"
@@ -88,6 +111,38 @@ export interface EventItem {
   registration_link: string;
   created_by: string | null;
   created_at: string;
+}
+
+export interface ExternalReading {
+  id: string;
+  title: string;
+  authors: string;
+  venue: string;
+  published_year: number | null;
+  source_url: string;
+  context: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExternalReadingInput {
+  id?: string;
+  title: string;
+  authors: string;
+  venue: string;
+  published_year: string;
+  source_url: string;
+  context: string;
+}
+
+export interface EventInput {
+  id?: string;
+  title: string;
+  description: string;
+  event_date: string;
+  location: string;
+  registration_link: string;
 }
 
 export type ProposalReviewAction = "approved" | "rejected" | "revision_requested";

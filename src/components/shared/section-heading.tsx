@@ -47,26 +47,47 @@ export function PageHeader({
   description,
   children,
   className,
+  size = "default",
 }: {
   kicker?: string;
   title: string;
   description?: string;
   children?: React.ReactNode;
   className?: string;
+  size?: "default" | "compact";
 }) {
+  const compact = size === "compact";
+
   return (
     <div className={cn("border-b border-line bg-paper", className)}>
-      <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-12 sm:px-6 sm:pt-16">
+      <div
+        className={cn(
+          "mx-auto w-full max-w-6xl px-4 sm:px-6",
+          compact ? "pb-5 pt-6 sm:pt-8" : "pb-10 pt-12 sm:pt-16",
+        )}
+      >
         {kicker && (
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-45">
             {kicker}
           </p>
         )}
-        <h1 className="max-w-[14ch] font-serif text-4xl leading-[1.05] tracking-tight text-ink sm:text-6xl">
+        <h1
+          className={cn(
+            "font-serif leading-[1.05] tracking-tight text-ink",
+            compact
+              ? "max-w-[20ch] text-3xl sm:text-4xl"
+              : "max-w-[14ch] text-4xl sm:text-6xl",
+          )}
+        >
           {title}
         </h1>
         {description && (
-          <p className="mt-4 max-w-[58ch] text-base leading-relaxed text-ink-70 sm:text-lg">
+          <p
+            className={cn(
+              "max-w-[58ch] leading-relaxed text-ink-70",
+              compact ? "mt-2 text-sm sm:text-base" : "mt-4 text-base sm:text-lg",
+            )}
+          >
             {description}
           </p>
         )}

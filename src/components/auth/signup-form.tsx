@@ -38,7 +38,7 @@ export function SignupForm() {
       return;
     }
 
-    router.replace("/onboarding");
+    router.replace("/portal");
     router.refresh();
   }
 

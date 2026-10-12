@@ -11,11 +11,61 @@ export function roleLabel(role: UserRole) {
   return ROLE_LABEL[role] ?? "Member";
 }
 
-/** Graduation is stored as a date; portfolios show the year. */
+/** Graduation is stored as a term (e.g. "Fall 2027"); portfolios show the year. */
 export function classYear(value: string | null | undefined) {
   if (!value) return null;
   const match = String(value).match(/\d{4}/);
   return match?.[0] ?? null;
+}
+
+export const GRAD_SEMESTERS = ["Spring", "Summer", "Fall"] as const;
+export type GradSemester = (typeof GRAD_SEMESTERS)[number];
+
+export function gradYearOptions(
+  baseYear = new Date().getFullYear(),
+  count = 8,
+): string[] {
+  return Array.from({ length: count }, (_, i) => String(baseYear + i));
+}
+
+/** Splits a stored graduation value into a semester and year. */
+export function parseGradTerm(value: string | null | undefined): {
+  semester: GradSemester;
+  year: string;
+} {
+  const raw = String(value ?? "").trim();
+
+  const term = raw.match(/^(spring|summer|fall)\s+(\d{4})$/i);
+  if (term) {
+    const semester =
+      (term[1][0].toUpperCase() + term[1].slice(1).toLowerCase()) as GradSemester;
+    return { semester, year: term[2] };
+  }
+
+  // Legacy ISO date (e.g. "2026-01-01").
+  const iso = raw.match(/^(\d{4})-(\d{1,2})-\d{1,2}$/);
+  if (iso) {
+    const month = Number(iso[2]);
+    const semester: GradSemester =
+      month <= 4 ? "Spring" : month <= 7 ? "Summer" : "Fall";
+    return { semester, year: iso[1] };
+  }
+
+  const yearOnly = raw.match(/^(\d{4})$/);
+  if (yearOnly) return { semester: "Spring", year: yearOnly[1] };
+
+  return { semester: "Spring", year: "" };
+}
+
+export function formatGradTerm(semester: string, year: string) {
+  const y = year.trim();
+  return y ? `${semester} ${y}` : "";
+}
+
+/** Human-readable graduation label, tolerant of legacy date values. */
+export function gradTermLabel(value: string | null | undefined) {
+  const { semester, year } = parseGradTerm(value);
+  return year ? `${semester} ${year}` : "";
 }
 
 export function profileSubtitle(profile: Profile) {

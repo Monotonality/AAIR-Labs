@@ -1,246 +1,266 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarDays, Users } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, History, LibraryBig, Search, Users } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
-import { SectionHeading } from "@/components/shared/section-heading";
-import { PipelineStepper } from "@/components/shared/pipeline-stepper";
-import { PaperCard } from "@/components/library/paper-card";
-import { EventCard } from "@/components/events/event-card";
-import { ResearcherCard } from "@/components/researchers/researcher-card";
-import {
-  getEvents,
-  getPublishedPapers,
-  getResearchers,
-} from "@/lib/data/queries";
+import { Input } from "@/components/ui/input";
 
-export const instant = false;
-
-function Hero() {
-  return (
-    <section className="relative border-b border-line bg-paper">
-      <div className="mx-auto w-full max-w-6xl px-4 pb-14 pt-12 sm:px-6 sm:pt-16">
-        <div className="mb-6">
-          <BrandLogo size="xl" className="rounded-md" />
-        </div>
-
-        <div className="mb-3 flex flex-wrap items-center gap-3">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-45">
-            AAIR Labs at UT Dallas
-          </span>
-          <span className="text-line">—</span>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-green">
-            Registered RSO · Spring 2026
-          </span>
-        </div>
-
-        <h1 className="max-w-[16ch] font-serif text-5xl leading-[1.02] tracking-tight text-ink sm:text-7xl">
-          Student research, <em className="italic">published</em> properly.
-        </h1>
-
-        <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-ink-70">
-          The central hub for Applied AI Research Labs — submit a paper proposal,
-          move it through peer review, and watch it land in the public library
-          beside your member portfolio.
-        </p>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Button asChild size="lg">
-            <Link href="/onboarding">
-              Join the lab <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/library">Browse the library</Link>
-          </Button>
-        </div>
-
-        <div className="mt-14 grid grid-cols-2 gap-0 border-t-2 border-ink sm:grid-cols-4">
-          {[
-            { k: "Pipeline", v: "5-step paper approval" },
-            { k: "Members", v: "Private researcher portfolios" },
-            { k: "Events", v: "Workshops, SOC, headshots" },
-            { k: "Compliance", v: "UTD RSO standards" },
-          ].map((m) => (
-            <div
-              key={m.k}
-              className="border-r border-line py-4 pr-5 last:border-r-0"
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-45">
-                {m.k}
-              </p>
-              <p className="mt-1 text-sm font-medium text-ink">{m.v}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PipelineSection() {
-  return (
-    <section className="py-16 sm:py-20">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <SectionHeading
-          kicker="Research engine"
-          title="From proposal to publication"
-          description="Every paper moves through the same five gates, from director approval to final checks and public release."
-        />
-        <PipelineStepper currentStep={1} />
-        <div className="mt-6 flex justify-end">
-          <Button asChild variant="secondary">
-            <Link href="/onboarding">
-              Submit a proposal <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-type HomePageProps = {
-  papers: Awaited<ReturnType<typeof getPublishedPapers>>;
-  events: Awaited<ReturnType<typeof getEvents>>;
-  researchers: Awaited<ReturnType<typeof getResearchers>>;
+export const metadata = {
+  title: "AAIR Labs Library",
+  description: "A research library for Applied AI Research Labs at UT Dallas.",
 };
 
-function LibraryPreview({ papers }: { papers: HomePageProps["papers"] }) {
+const SUBJECTS = [
+  {
+    title: "Artificial Intelligence",
+    description:
+      "Machine learning, deep learning, NLP, computer vision, and agent systems.",
+    href: "/library?subject=AI",
+  },
+  {
+    title: "Data Science & Analytics",
+    description: "Methodology, statistics, data engineering, and evaluation.",
+    href: "/library?subject=Data+Science",
+  },
+  {
+    title: "Human–AI Interaction",
+    description: "Usability, ethics, safety, and responsible AI research.",
+    href: "/library?subject=HCI",
+  },
+  {
+    title: "Security & Privacy",
+    description: "Trustworthy AI, adversarial robustness, and privacy-preserving methods.",
+    href: "/library?subject=Security",
+  },
+  {
+    title: "Systems & Infrastructure",
+    description: "MLOps, scaling, edge, and performance for AI workloads.",
+    href: "/library?subject=Systems",
+  },
+  {
+    title: "Interdisciplinary",
+    description: "AI applications across domains, policy, and education.",
+    href: "/library?subject=Interdisciplinary",
+  },
+];
+
+const RESOURCES = [
+  {
+    icon: History,
+    title: "History",
+    description: "Milestones, timelines, and the evolution of AAIR Labs research.",
+    href: "/about",
+  },
+  {
+    icon: LibraryBig,
+    title: "Collected Works",
+    description:
+      "AAIR Labs papers and reports, plus external reading the lab recommends but did not produce.",
+    href: "/library",
+  },
+  {
+    icon: Users,
+    title: "Researchers",
+    description: "Member profiles, portfolios, and areas of expertise.",
+    href: "/researchers",
+  },
+];
+
+export default function Home() {
   return (
-    <section className="border-y border-line bg-surface/60 py-16 sm:py-20">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <SectionHeading
-          index="01"
-          kicker="Public library"
-          title="Recently published"
-          description="Whitepapers and technical frameworks written and reviewed by AAIR Labs members."
+    <main>
+      {/* Hero with photo background + search */}
+      <section className="relative flex min-h-[520px] items-center justify-center border-b border-line overflow-hidden bg-ink">
+        {/* Background image - placeholder, can be replaced with AAIR Assets */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/logo.png')",
+            backgroundBlendMode: "overlay",
+            backgroundColor: "rgba(0,0,0,0.55)",
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+          }}
+          aria-hidden="true"
         />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {papers.slice(0, 3).map((paper) => (
-            <PaperCard key={paper.id} project={paper} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" aria-hidden="true" />
 
-function EventsPreview({ events }: { events: HomePageProps["events"] }) {
-  return (
-    <section className="py-16 sm:py-20">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <SectionHeading
-          index="02"
-          kicker="Events"
-          title="On the calendar"
-          description="Workshops, guest speakers, SOC meetings, and headshot sessions."
-        />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {events.slice(0, 3).map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
-        <div className="mt-8 flex justify-end">
-          <Button asChild variant="ghost">
-            <Link href="/events">
-              Full calendar <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ResearchersPreview({
-  researchers,
-}: {
-  researchers: HomePageProps["researchers"];
-}) {
-  return (
-    <section className="border-t border-line bg-paper-deep/50 py-16 sm:py-20">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <SectionHeading
-          index="03"
-          kicker="Members"
-          title="Meet the researchers"
-          description="Onboarded members with public portfolios spanning NLP, computer vision, and reinforcement learning."
-        />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {researchers.slice(0, 3).map((profile) => (
-            <ResearcherCard key={profile.id} profile={profile} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CtaBand() {
-  const items = [
-    {
-      icon: BookOpen,
-      title: "Publish with us",
-      desc: "Proposals, status papers, and peer review — all in one pipeline.",
-      href: "/onboarding",
-      label: "Start onboarding",
-    },
-    {
-      icon: CalendarDays,
-      title: "Come to an event",
-      desc: "Workshops and meetings are open to all UT Dallas students.",
-      href: "/events",
-      label: "See the calendar",
-    },
-    {
-      icon: Users,
-      title: "Browse the roster",
-      desc: "Every member gets a public portfolio with their research feed.",
-      href: "/researchers",
-      label: "Meet the members",
-    },
-  ];
-
-  return (
-    <section className="border-t border-line py-16 sm:py-20">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:px-6 lg:grid-cols-3">
-        {items.map((item) => (
-          <div
-            key={item.title}
-            className="flex flex-col gap-3 border border-line bg-surface p-6"
-          >
-            <item.icon className="size-5 text-ink" />
-            <h3 className="font-serif text-2xl">{item.title}</h3>
-            <p className="text-sm leading-relaxed text-ink-70">{item.desc}</p>
-            <Link
-              href={item.href}
-              className="mt-auto inline-flex items-center gap-1.5 border-b-[1.5px] border-ink pb-0.5 text-sm font-semibold text-ink transition-colors hover:border-green hover:text-green"
-            >
-              {item.label} <ArrowRight className="size-4" />
-            </Link>
+        <div className="relative z-10 mx-auto w-full max-w-4xl px-4 py-16 sm:px-6">
+          <div className="mb-6 flex items-center justify-center">
+            <BrandLogo size="xl" className="rounded-md bg-paper/95 p-3 shadow-lg" />
           </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
-export default async function Home() {
-  const [papers, events, researchers] = await Promise.all([
-    getPublishedPapers(),
-    getEvents(),
-    getResearchers(),
-  ]);
+          <h1 className="text-center font-serif text-4xl leading-tight tracking-tight text-white sm:text-6xl drop-shadow-lg">
+            AAIR Labs Research Library
+          </h1>
+          <p className="mt-4 text-center text-lg leading-relaxed text-paper/80 sm:text-xl">
+            Search papers, technical reports, and research from Applied AI
+            Research Labs at UT Dallas.
+          </p>
 
-  return (
-    <>
-      <Hero />
-      <PipelineSection />
-      <LibraryPreview papers={papers} />
-      <EventsPreview events={events} />
-      <ResearchersPreview researchers={researchers} />
-      <CtaBand />
-    </>
+          {/* Search bar */}
+          <form action="/library" className="mt-8">
+            <div className="relative mx-auto flex max-w-2xl items-center">
+              <Input
+                type="search"
+                name="q"
+                placeholder="Search papers..."
+                className="h-14 rounded-full border-white bg-white pl-12 pr-32 text-base text-ink shadow-2xl"
+                aria-label="Search the research library"
+              />
+              <Search className="absolute left-4 size-5 text-ink-50" aria-hidden="true" />
+              <Button
+                type="submit"
+                size="lg"
+                className="absolute right-2 rounded-full"
+              >
+                Search
+              </Button>
+            </div>
+          </form>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Button asChild variant="secondary" size="sm" className="bg-white text-ink hover:bg-white/90">
+              <Link href="/library">Browse all papers</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="text-paper hover:bg-paper/10 hover:text-paper">
+              <Link href="/researchers">Explore researchers</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Resources section */}
+      <section className="border-b border-line bg-surface py-16 sm:py-20">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <div className="mb-10">
+            <h2 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">
+              Resources
+            </h2>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-70">
+              Explore our collections, institutional history, and the members
+              driving our research.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {RESOURCES.map((resource) => (
+              <Link
+                key={resource.title}
+                href={resource.href}
+                className="group flex flex-col gap-4 border border-line bg-paper p-6 transition-colors hover:border-ink"
+              >
+                <resource.icon className="size-6 text-ink" />
+                <div>
+                  <h3 className="font-serif text-2xl text-ink">{resource.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-70">
+                    {resource.description}
+                  </p>
+                </div>
+                <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-ink group-hover:text-green">
+                  Learn more <ArrowRight className="size-4" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Subjects with dropdowns */}
+      <section className="border-b border-line bg-paper py-16 sm:py-20">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <div className="mb-10">
+            <h2 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">
+              Browse by Subject
+            </h2>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-70">
+              Discover research across core areas of artificial intelligence and
+              its applications.
+            </p>
+          </div>
+
+          <div className="divide-y divide-line border-t border-line">
+            {SUBJECTS.map((subject) => (
+              <details key={subject.title} className="group">
+                <summary className="flex cursor-pointer items-center justify-between py-5 pr-2 list-none transition-colors hover:bg-surface/40">
+                  <h3 className="font-serif text-xl text-ink sm:text-2xl">
+                    {subject.title}
+                  </h3>
+                  <ChevronDown className="size-5 shrink-0 text-ink-50 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="pb-6 pr-2 pl-1">
+                  <p className="max-w-3xl text-sm leading-relaxed text-ink-70">
+                    {subject.description}
+                  </p>
+                  <div className="mt-4">
+                    <Button asChild variant="ghost" size="sm">
+                      <Link href={subject.href}>
+                        View papers <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* New to the library */}
+      <section className="border-b border-line bg-surface py-16 sm:py-20">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">
+                New to the library?
+              </h2>
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-70">
+                Learn how our peer-review pipeline works, how to submit a
+                proposal, or get oriented as a new member.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link href="/onboarding">
+                  Get started <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/library">Browse the collection</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="border border-line bg-paper p-5">
+              <BookOpen className="size-5 text-ink" />
+              <h3 className="mt-3 font-serif text-xl">How publishing works</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-70">
+                Papers move through a structured 5-step approval pipeline before
+                public release.
+              </p>
+            </div>
+            <div className="border border-line bg-paper p-5">
+              <Users className="size-5 text-ink" />
+              <h3 className="mt-3 font-serif text-xl">Join AAIR Labs</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-70">
+                Open to UT Dallas students. Create your profile and portfolio
+                as you publish.
+              </p>
+            </div>
+            <div className="border border-line bg-paper p-5">
+              <LibraryBig className="size-5 text-ink" />
+              <h3 className="mt-3 font-serif text-xl">Open access research</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-70">
+                The public library holds member papers and external reading.
+                Outside sources are labeled and were not written by AAIR Labs.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+    </main>
   );
 }

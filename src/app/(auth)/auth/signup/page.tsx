@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 export default function SignupPage() {
   return (
     <AuthCard
-      kicker="Get started"
-      title="Create your account"
+      kicker="Join AAIR Labs"
+      title="Create account"
       footer={
         <>
-          Already a member?{" "}
+          Already have an account?{" "}
           <a href="/auth/login" className="font-semibold underline-offset-4 hover:underline">
             Sign in
           </a>

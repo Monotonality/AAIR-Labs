@@ -39,7 +39,7 @@ export function LoginForm() {
     }
 
     const next = searchParams.get("next");
-    router.replace(next || "/onboarding");
+    router.replace(next || "/portal");
     router.refresh();
   }
 
