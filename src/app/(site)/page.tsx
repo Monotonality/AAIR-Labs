@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronDown, History, LibraryBig, Search, Users } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, Info, LibraryBig, Search, Users } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
@@ -46,9 +46,9 @@ const SUBJECTS = [
 
 const RESOURCES = [
   {
-    icon: History,
-    title: "History",
-    description: "Milestones, timelines, and the evolution of AAIR Labs research.",
+    icon: Info,
+    title: "About",
+    description: "Our mission, faculty ties, and how AAIR Labs bridges students and research.",
     href: "/about",
   },
   {
@@ -138,8 +138,8 @@ export default function Home() {
               Resources
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-70">
-              Explore our collections, institutional history, and the members
-              driving our research.
+              Explore our story, our collections, and the members driving our
+              research.
             </p>
           </div>
 

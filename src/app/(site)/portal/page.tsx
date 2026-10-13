@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { BookOpen, CalendarDays, ClipboardCheck, FileText, Settings, User } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardCheck, FileText, Settings, User, Users } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/section-heading";
 import { Button } from "@/components/ui/button";
@@ -106,8 +106,8 @@ export default async function PortalPage() {
             <div className="border-b-2 border-ink pb-3">
               <h2 className="font-serif text-2xl tracking-tight">Admin</h2>
               <p className="mt-1 text-sm text-ink-70">
-                Review membership applications, manage the events calendar, and
-                curate external reading.
+                Review membership applications, manage members, curate external
+                reading, and run the events calendar.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -122,6 +122,19 @@ export default async function PortalPage() {
                     <Link href="/portal/applications">
                       Review applications
                     </Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 border border-line bg-surface p-6">
+                <Users className="size-5 text-ink" />
+                <h3 className="font-serif text-2xl">Manage Members</h3>
+                <p className="text-sm leading-relaxed text-ink-70">
+                  Update member titles, grant admin access, and remove accounts.
+                </p>
+                <div className="mt-auto">
+                  <Button asChild size="sm">
+                    <Link href="/portal/members">Manage members</Link>
                   </Button>
                 </div>
               </div>

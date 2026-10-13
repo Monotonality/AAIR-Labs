@@ -47,6 +47,7 @@ export interface Profile {
   email: string;
   full_name: string;
   role: UserRole;
+  title: string | null;
   major: string;
   expected_grad_date: string;
   fields_of_interest: string[];

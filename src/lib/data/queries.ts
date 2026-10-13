@@ -119,6 +119,23 @@ export async function getResearchers(): Promise<Profile[]> {
   return (data as Profile[]) ?? [];
 }
 
+/** Every profile, newest first. Directors use this on the members page. */
+export async function getMembers(): Promise<Profile[]> {
+  if (!hasSupabaseEnv()) {
+    return SAMPLE_AUTHORS;
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
+  return (data as Profile[]) ?? [];
+}
+
 export const getProfileByUsername = cache(async function getProfileByUsername(
   username: string,
 ): Promise<{

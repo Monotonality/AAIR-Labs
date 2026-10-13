@@ -59,10 +59,22 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
+  const supabase = await createClient();
+
+  // The applicant's name and UTD email are tied to their account and are not
+  // editable from the membership application.
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", userId)
+    .maybeSingle();
+
   const fullName = String(
-    body.fullName ?? user.user_metadata?.full_name ?? "",
+    existingProfile?.full_name ??
+      (user.user_metadata?.full_name as string | undefined) ??
+      "",
   ).trim();
-  const email = String(body.email ?? user.email ?? "").trim();
+  const email = String(existingProfile?.email ?? user.email ?? "").trim();
   const personalEmail = String(body.personalEmail ?? "").trim() || null;
   const major = String(body.major ?? "").trim() || null;
   const expectedGradDate = normalizeGradTerm(
@@ -81,8 +93,6 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-
-  const supabase = await createClient();
 
   const university = String(body.university ?? "").trim() || null;
   const { error: applicationError } = await supabase.from("applications").insert({

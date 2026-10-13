@@ -40,7 +40,15 @@ export default async function MembershipApplicationPage() {
         {approved ? (
           <AlreadyMemberNotice username={profile?.username ?? null} />
         ) : (
-          <ProfileApplicationForm profile={profile} />
+          <ProfileApplicationForm
+            profile={profile}
+            accountName={
+              profile?.full_name ??
+              (user.user_metadata?.full_name as string | undefined) ??
+              ""
+            }
+            accountEmail={user.email ?? profile?.email ?? ""}
+          />
         )}
       </section>
     </>

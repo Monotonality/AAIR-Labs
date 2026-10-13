@@ -22,15 +22,21 @@ const SELECT_CLASS =
 
 interface ProfileApplicationFormProps {
   profile: Profile | null;
+  accountName: string;
+  accountEmail: string;
 }
 
-export function ProfileApplicationForm({ profile }: ProfileApplicationFormProps) {
+export function ProfileApplicationForm({
+  profile,
+  accountName,
+  accountEmail,
+}: ProfileApplicationFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [data, setData] = useState({
-    fullName: profile?.full_name || "",
-    email: profile?.email || "",
+    fullName: accountName,
+    email: accountEmail,
     personalEmail: "",
     major: profile?.major || "",
     expectedGradDate: profile?.expected_grad_date || "",
@@ -74,23 +80,23 @@ export function ProfileApplicationForm({ profile }: ProfileApplicationFormProps)
           <Input
             id="fullName"
             value={data.fullName}
-            onChange={(e) => setData((d) => ({ ...d, fullName: e.target.value }))}
-            required
+            readOnly
+            className="cursor-not-allowed bg-paper/60 text-ink-70"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="email">UTD email</Label>
+          <Label htmlFor="email">University Email</Label>
           <Input
             id="email"
             type="email"
             value={data.email}
-            onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))}
+            readOnly
             placeholder="you@utdallas.edu"
-            required
+            className="cursor-not-allowed bg-paper/60 text-ink-70"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="personalEmail">Personal email</Label>
+          <Label htmlFor="personalEmail">Alternative email</Label>
           <Input
             id="personalEmail"
             type="email"

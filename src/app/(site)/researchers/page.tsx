@@ -18,7 +18,7 @@ export default async function ResearchersPage() {
       <PageHeader
         kicker="Members"
         title="The AAIR Labs roster"
-        description="Onboarded members and their public researcher portfolios. Following the steps in onboarding adds your page here."
+        description="Onboarded members and their public researcher portfolios."
       />
       <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
         {researchers.length === 0 ? (
