@@ -12,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CATEGORY_LABELS } from "@/lib/events";
 import type { EventItem } from "@/lib/types";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -247,9 +246,6 @@ export function EventsCalendar({
           <div className="space-y-5">
             {selectedEvents.map((event) => (
               <article key={event.id} className="space-y-2 border-t border-line pt-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-45">
-                  {CATEGORY_LABELS[event.category] ?? "Event"}
-                </p>
                 <h3 className="font-serif text-xl leading-tight">{event.title}</h3>
                 <p className="text-sm text-ink-70">{formatEventDate(event.event_date)}</p>
                 {event.location && (
