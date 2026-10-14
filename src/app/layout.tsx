@@ -20,13 +20,46 @@ const mono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
+
+const siteDescription =
+  "Applied AI Research Labs at UT Dallas: student research, member portfolios, events, and the public paper library.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "AAIR Labs at UTD",
     template: "%s · AAIR Labs",
   },
-  description:
-    "Applied AI Research Labs at UT Dallas — student research, member portfolios, events, and the public paper library.",
+  description: siteDescription,
+  applicationName: "AAIR Labs",
+  openGraph: {
+    type: "website",
+    siteName: "AAIR Labs",
+    title: "AAIR Labs at UTD",
+    description: siteDescription,
+    url: "/",
+    images: [
+      {
+        url: "/aair-namesake-logo-full.jpg",
+        width: 4000,
+        height: 2333,
+        alt: "AAIR Labs at UT Dallas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AAIR Labs at UTD",
+    description: siteDescription,
+    images: ["/aair-namesake-logo-full.jpg"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
