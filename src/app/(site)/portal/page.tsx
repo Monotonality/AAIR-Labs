@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { BookOpen, CalendarDays, ClipboardCheck, FileText, Settings, User, Users } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardCheck, FileText, Megaphone, Settings, User, Users } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/section-heading";
 import { Button } from "@/components/ui/button";
@@ -135,6 +135,20 @@ export default async function PortalPage() {
                 <div className="mt-auto">
                   <Button asChild size="sm">
                     <Link href="/portal/members">Manage members</Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 border border-line bg-surface p-6">
+                <Megaphone className="size-5 text-ink" />
+                <h3 className="font-serif text-2xl">Generate Marketing</h3>
+                <p className="text-sm leading-relaxed text-ink-70">
+                  Fill in the event details and download the square and story
+                  graphics.
+                </p>
+                <div className="mt-auto">
+                  <Button asChild size="sm">
+                    <Link href="/portal/marketing">Generate marketing</Link>
                   </Button>
                 </div>
               </div>
