@@ -34,6 +34,7 @@ const LINK_ICONS: Record<(typeof LAB_LINKS)[number]["key"], LucideIcon> = {
 };
 
 const GROUP_ME = LAB_LINKS.find((link) => link.key === "groupme");
+const LINKEDIN = LAB_LINKS.find((link) => link.key === "linkedin");
 
 export default async function PortalResourcesPage() {
   await connection();
@@ -229,8 +230,19 @@ export default async function PortalResourcesPage() {
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-70">
               Download the animated GIF to announce that you joined AAIR Labs, and
               use the example below as a reference for your post. Tag{" "}
-              <span className="font-semibold text-ink">AAIR Labs</span> so we can
-              repost your announcement.
+              {LINKEDIN ? (
+                <a
+                  href={LINKEDIN.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border-b-[1.5px] border-ink font-semibold text-ink hover:border-green hover:text-green"
+                >
+                  AAIR Labs
+                </a>
+              ) : (
+                <span className="font-semibold text-ink">AAIR Labs</span>
+              )}{" "}
+              so we can repost your announcement.
             </p>
           </div>
 
