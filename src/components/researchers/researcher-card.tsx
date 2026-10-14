@@ -36,6 +36,9 @@ export function ResearcherCard({ profile }: { profile: Profile }) {
           <h4 className="font-serif text-lg leading-tight">
             {profile.full_name}
           </h4>
+          {profile.title && (
+            <p className="text-sm text-ink-70">{profile.title}</p>
+          )}
           <p className="text-[11.5px] font-semibold uppercase tracking-wider text-ink-45">
             {profile.major}
             {year ? ` · ${year}` : ""}

@@ -65,7 +65,14 @@ export async function SiteHeader() {
 
         <div className="hidden items-center gap-2 sm:flex">{authArea}</div>
 
-        <MobileNav items={mainNav} authArea={authArea} />
+        <div className="flex items-center gap-2 sm:hidden">
+          {!isAuthed && (
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/auth/login">Sign in</Link>
+            </Button>
+          )}
+          <MobileNav items={mainNav} authArea={authArea} />
+        </div>
       </div>
     </header>
   );

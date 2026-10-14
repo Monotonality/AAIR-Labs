@@ -69,8 +69,11 @@ export default async function ResearcherPage({
             <ProfilePortrait name={profile.full_name} src={profile.avatar_url} />
             <div>
               <p className="font-serif text-2xl leading-tight">{profile.full_name}</p>
+              {profile.title && (
+                <p className="mt-0.5 text-sm font-medium text-ink-70">{profile.title}</p>
+              )}
               {profile.major && (
-                <p className="mt-1 text-[11.5px] font-semibold uppercase tracking-wider text-ink-45">
+                <p className="mt-0.5 text-[11.5px] font-semibold uppercase tracking-wider text-ink-45">
                   {profile.major}
                 </p>
               )}

@@ -70,7 +70,12 @@ export function gradTermLabel(value: string | null | undefined) {
 
 export function profileSubtitle(profile: Profile) {
   const year = classYear(profile.expected_grad_date);
-  return [profile.major, year ? `Class of ${year}` : null, roleLabel(profile.role)]
+  return [
+    profile.title,
+    profile.major,
+    year ? `Class of ${year}` : null,
+    roleLabel(profile.role),
+  ]
     .filter(Boolean)
     .join(" \u00b7 ");
 }
