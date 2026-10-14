@@ -224,6 +224,74 @@ export default async function PortalResourcesPage() {
         <div className="mt-16 space-y-8">
           <div>
             <h2 className="font-serif text-2xl tracking-tight text-ink">
+              LinkedIn announcement kit
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-70">
+              Download the animated GIF to announce that you joined AAIR Labs, and
+              use the example below as a reference for your post. Tag{" "}
+              <span className="font-semibold text-ink">AAIR Labs</span> so we can
+              repost your announcement.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="flex flex-col border border-line bg-surface">
+              <Image
+                src="/resources/aair-animated.gif"
+                alt="AAIR Labs animated announcement GIF"
+                width={1080}
+                height={1350}
+                unoptimized
+                className="h-auto w-full"
+              />
+              <div className="mt-auto flex items-center justify-between gap-3 border-t border-line p-4">
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    Announcement GIF
+                  </p>
+                  <p className="text-xs text-ink-45">1080 × 1350</p>
+                </div>
+                <a
+                  href="/resources/aair-animated.gif"
+                  download
+                  className="inline-flex items-center gap-1.5 border-b-[1.5px] border-ink pb-0.5 text-[13px] font-semibold text-ink hover:border-green hover:text-green"
+                >
+                  <Download className="size-3.5" />
+                  Download
+                </a>
+              </div>
+            </div>
+            <div className="flex flex-col border border-line bg-surface">
+              <Image
+                src="/resources/announcement-example.png"
+                alt="Example LinkedIn announcement post using the AAIR Labs GIF"
+                width={780}
+                height={791}
+                className="h-auto w-full"
+              />
+              <div className="mt-auto flex items-center justify-between gap-3 border-t border-line p-4">
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    Announcement example
+                  </p>
+                  <p className="text-xs text-ink-45">780 × 791</p>
+                </div>
+                <a
+                  href="/resources/announcement-example.png"
+                  download
+                  className="inline-flex items-center gap-1.5 border-b-[1.5px] border-ink pb-0.5 text-[13px] font-semibold text-ink hover:border-green hover:text-green"
+                >
+                  <Download className="size-3.5" />
+                  Download
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-16 space-y-8">
+          <div>
+            <h2 className="font-serif text-2xl tracking-tight text-ink">
               LinkedIn banner options
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-70">
