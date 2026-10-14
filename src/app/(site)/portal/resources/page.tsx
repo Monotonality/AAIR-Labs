@@ -269,21 +269,13 @@ export default async function PortalResourcesPage() {
                 height={791}
                 className="h-auto w-full"
               />
-              <div className="mt-auto flex items-center justify-between gap-3 border-t border-line p-4">
-                <div>
-                  <p className="text-sm font-semibold text-ink">
-                    Announcement example
-                  </p>
-                  <p className="text-xs text-ink-45">780 × 791</p>
-                </div>
-                <a
-                  href="/resources/announcement-example.png"
-                  download
-                  className="inline-flex items-center gap-1.5 border-b-[1.5px] border-ink pb-0.5 text-[13px] font-semibold text-ink hover:border-green hover:text-green"
-                >
-                  <Download className="size-3.5" />
-                  Download
-                </a>
+              <div className="mt-auto border-t border-line p-4">
+                <p className="text-sm font-semibold text-ink">
+                  Announcement example
+                </p>
+                <p className="mt-0.5 text-xs text-ink-45">
+                  Reference for your post
+                </p>
               </div>
             </div>
           </div>
