@@ -24,12 +24,14 @@ interface ProfileApplicationFormProps {
   profile: Profile | null;
   accountName: string;
   accountEmail: string;
+  readOnly?: boolean;
 }
 
 export function ProfileApplicationForm({
   profile,
   accountName,
   accountEmail,
+  readOnly = false,
 }: ProfileApplicationFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +48,7 @@ export function ProfileApplicationForm({
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (readOnly) return;
     setError(null);
     setIsSubmitting(true);
 
@@ -101,19 +104,21 @@ export function ProfileApplicationForm({
             id="personalEmail"
             type="email"
             value={data.personalEmail}
-            onChange={(e) => setData((d) => ({ ...d, personalEmail: e.target.value }))}
-            placeholder="you@gmail.com"
-            required
-          />
+              onChange={(e) => setData((d) => ({ ...d, personalEmail: e.target.value }))}
+              placeholder="you@gmail.com"
+              required
+              disabled={readOnly}
+            />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="major">Major</Label>
           <Input
             id="major"
-            value={data.major}
-            onChange={(e) => setData((d) => ({ ...d, major: e.target.value }))}
-            required
-          />
+              value={data.major}
+              onChange={(e) => setData((d) => ({ ...d, major: e.target.value }))}
+              required
+              disabled={readOnly}
+            />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="gradSemester">Expected graduation</Label>
@@ -131,6 +136,7 @@ export function ProfileApplicationForm({
                 }))
               }
               className={SELECT_CLASS}
+              disabled={readOnly}
             >
               {GRAD_SEMESTERS.map((semester) => (
                 <option key={semester} value={semester}>
@@ -152,6 +158,7 @@ export function ProfileApplicationForm({
               }
               className={SELECT_CLASS}
               required
+              disabled={readOnly}
             >
               <option value="" disabled>
                 Year
@@ -168,10 +175,11 @@ export function ProfileApplicationForm({
           <Label htmlFor="university">University</Label>
           <Input
             id="university"
-            value={data.university}
-            onChange={(e) => setData((d) => ({ ...d, university: e.target.value }))}
-            required
-          />
+              value={data.university}
+              onChange={(e) => setData((d) => ({ ...d, university: e.target.value }))}
+              required
+              disabled={readOnly}
+            />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="bio">Short bio (optional)</Label>
@@ -180,14 +188,22 @@ export function ProfileApplicationForm({
             rows={3}
             value={data.bio}
             onChange={(e) => setData((d) => ({ ...d, bio: e.target.value }))}
+            disabled={readOnly}
           />
         </div>
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Submit application"}
-        </Button>
+        {readOnly ? (
+          <Alert className="border-green bg-green-tint text-green">
+            Your application has been submitted and is under review. Reach out
+            in the GroupMe if anything needs to change.
+          </Alert>
+        ) : (
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Submit application"}
+          </Button>
+        )}
       </div>
     </form>
   );

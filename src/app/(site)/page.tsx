@@ -221,7 +221,7 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link href="/onboarding">
+                <Link href="/portal/onboarding">
                   Get started <ArrowRight className="size-4" />
                 </Link>
               </Button>

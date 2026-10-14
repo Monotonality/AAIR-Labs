@@ -46,7 +46,7 @@ function Hero() {
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Button asChild size="lg">
-            <Link href="/onboarding">
+            <Link href="/portal/onboarding">
               Join the lab <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -92,7 +92,7 @@ function PipelineSection() {
         <PipelineStepper currentStep={1} />
         <div className="mt-6 flex justify-end">
           <Button asChild variant="secondary">
-            <Link href="/onboarding">
+            <Link href="/portal/onboarding">
               Submit a proposal <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -185,7 +185,7 @@ function CtaBand() {
       icon: BookOpen,
       title: "Publish with us",
       desc: "Proposals, status papers, and peer review — all in one pipeline.",
-      href: "/onboarding",
+      href: "/portal/onboarding",
       label: "Start onboarding",
     },
     {

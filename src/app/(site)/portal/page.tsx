@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { BookOpen, CalendarDays, ClipboardCheck, FileText, Megaphone, Settings, User, Users } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardCheck, FileText, FolderOpen, Megaphone, Settings, User, Users } from "lucide-react";
 
+import { OnboardingCard } from "@/components/portal/onboarding-card";
 import { PageHeader } from "@/components/shared/section-heading";
 import { Button } from "@/components/ui/button";
 import { getAuthenticatedUser, isAdmin } from "@/lib/auth-helpers";
@@ -32,10 +33,16 @@ export default async function PortalPage() {
       <PageHeader
         kicker="Member portal"
         title={profile?.full_name ? `Welcome, ${profile.full_name}` : "Welcome"}
-        description="Access your personal page, account settings, and membership application."
+        description="Finish onboarding, view your personal page, manage your account, and grab member resources."
       />
       <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <OnboardingCard
+            applicationComplete={
+              Boolean(profile?.onboarding_completed) || approved
+            }
+          />
+
           <div className="flex flex-col gap-4 border border-line bg-surface p-6">
             <User className="size-5 text-ink" />
             <h2 className="font-serif text-2xl">Personal Page</h2>
@@ -97,6 +104,20 @@ export default async function PortalPage() {
                   <Link href="/profile/application">Membership application</Link>
                 </Button>
               )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 border border-line bg-surface p-6">
+            <FolderOpen className="size-5 text-ink" />
+            <h2 className="font-serif text-2xl">Resources</h2>
+            <p className="text-sm leading-relaxed text-ink-70">
+              Links to the GroupMe, Instagram, and LinkedIn, plus a LinkedIn
+              tutorial and downloadable banner options.
+            </p>
+            <div className="mt-auto">
+              <Button asChild size="sm" variant="secondary">
+                <Link href="/portal/resources">View resources</Link>
+              </Button>
             </div>
           </div>
         </div>

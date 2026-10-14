@@ -79,6 +79,18 @@ export function EventsCalendar({
     return map;
   }, [events, placed]);
 
+  const monthEvents = useMemo(() => {
+    if (!placed) return [];
+    return events
+      .filter((event) => {
+        const date = new Date(event.event_date);
+        return (
+          date.getFullYear() === cursor.year && date.getMonth() === cursor.month
+        );
+      })
+      .sort((a, b) => a.event_date.localeCompare(b.event_date));
+  }, [events, placed, cursor.year, cursor.month]);
+
   const monthLabel = new Intl.DateTimeFormat("en-US", {
     month: "long",
     year: "numeric",
@@ -142,7 +154,40 @@ export function EventsCalendar({
         </div>
       </div>
 
-      <div className="overflow-hidden border border-line bg-surface">
+      <div className="sm:hidden">
+        {monthEvents.length === 0 ? (
+          <p className="border border-line bg-surface px-4 py-8 text-center text-sm text-ink-45">
+            Nothing is scheduled this month.
+          </p>
+        ) : (
+          <ul className="divide-y divide-line border border-line bg-surface">
+            {monthEvents.map((event) => (
+              <li key={event.id}>
+                <button
+                  type="button"
+                  onClick={() => setOpenDay(dayKey(new Date(event.event_date)))}
+                  className="flex w-full flex-col gap-1 px-4 py-3 text-left hover:bg-paper"
+                >
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-45">
+                    {formatEventDate(event.event_date)}
+                  </span>
+                  <span className="font-serif text-lg leading-tight">
+                    {event.title}
+                  </span>
+                  {event.location && (
+                    <span className="inline-flex items-center gap-1.5 text-[13px] text-ink-70">
+                      <MapPin className="size-3.5 text-ink-45" />
+                      {event.location}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="hidden overflow-hidden border border-line bg-surface sm:block">
         <div className="grid grid-cols-7 border-b border-line bg-paper">
           {WEEKDAYS.map((day) => (
             <div
@@ -189,14 +234,6 @@ export function EventsCalendar({
                   {day.getDate()}
                 </button>
 
-                {dayEvents.length > 0 && (
-                  <div className="flex gap-0.5 sm:hidden" aria-hidden>
-                    {dayEvents.slice(0, 3).map((event) => (
-                      <span key={event.id} className="size-1.5 bg-ink" />
-                    ))}
-                  </div>
-                )}
-
                 <ul className="hidden space-y-1 sm:block">
                   {visible.map((event) => (
                     <li key={event.id}>
@@ -227,7 +264,7 @@ export function EventsCalendar({
         </div>
       </div>
 
-      <p className="text-sm text-ink-45">
+      <p className="hidden text-sm text-ink-45 sm:block">
         {placed && events.length === 0
           ? "Nothing is scheduled yet."
           : "Select a date to open its events."}
@@ -264,7 +301,7 @@ export function EventsCalendar({
                     rel="noopener noreferrer"
                     className="inline-flex border-b-[1.5px] border-ink pb-0.5 text-[13px] font-semibold text-ink hover:border-green hover:text-green"
                   >
-                    Register
+                    Link
                   </a>
                 )}
               </article>

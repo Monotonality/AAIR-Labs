@@ -54,7 +54,7 @@ export async function proxy(request: NextRequest) {
 
   if (user && AUTH_PATHS.includes(pathname)) {
     const next = request.nextUrl.searchParams.get("next");
-    return NextResponse.redirect(new URL(next || "/onboarding", request.url));
+    return NextResponse.redirect(new URL(next || "/portal", request.url));
   }
 
   return response;

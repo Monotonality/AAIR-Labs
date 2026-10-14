@@ -24,6 +24,7 @@ export default async function MembershipApplicationPage() {
 
   const { profile } = await getProfileById(user.id);
   const approved = await isApprovedMember(user.id);
+  const submitted = Boolean(profile?.onboarding_completed);
 
   return (
     <>
@@ -33,7 +34,9 @@ export default async function MembershipApplicationPage() {
         description={
           approved
             ? "Your membership application has already been approved."
-            : "Fill out your details to apply for AAIR Labs membership."
+            : submitted
+              ? "Your application has been submitted and is under review."
+              : "Fill out your details to apply for AAIR Labs membership."
         }
       />
       <section className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
@@ -48,6 +51,7 @@ export default async function MembershipApplicationPage() {
               ""
             }
             accountEmail={user.email ?? profile?.email ?? ""}
+            readOnly={submitted}
           />
         )}
       </section>
