@@ -3,7 +3,7 @@ import { connection } from "next/server";
 
 import { ExternalReadingList } from "@/components/library/external-reading-list";
 import { LibrarySearch } from "@/components/library/library-search";
-import { getExternalReadings, getPublishedPapers } from "@/lib/data/queries";
+import { getExternalReadings, getLibraryPapers } from "@/lib/data/queries";
 
 export const instant = false;
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default async function LibraryPage() {
   await connection();
   const [papers, readings] = await Promise.all([
-    getPublishedPapers(),
+    getLibraryPapers(),
     getExternalReadings(),
   ]);
 

@@ -65,6 +65,11 @@ export const SAMPLE_PAPERS: Project[] = [
     abstract:
       "A practical comparison of LoRA adapters across three 7B-parameter models, measuring VRAM, throughput, and task accuracy on a single consumer GPU.",
     target_domain: "Efficient ML",
+    document_type: "whitepaper",
+    topics: ["Efficient ML", "Fine-Tuning"],
+    geographic_scope: [],
+    methodology: ["Benchmark Study"],
+    data_sources: [],
     status: "approved",
     director_feedback: "",
     status_reviewed_at: "2026-09-02T00:00:00Z",
@@ -80,6 +85,11 @@ export const SAMPLE_PAPERS: Project[] = [
     abstract:
       "Design and evaluation of a retrieval-augmented tutoring agent for introductory CS courses, with human-graded response quality results.",
     target_domain: "NLP",
+    document_type: "research_paper",
+    topics: ["NLP", "Education"],
+    geographic_scope: [],
+    methodology: ["Human Evaluation"],
+    data_sources: [],
     status: "approved",
     director_feedback: "",
     status_reviewed_at: "2026-09-10T00:00:00Z",

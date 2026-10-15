@@ -35,6 +35,26 @@ export type PaperStatus =
   | "revision_required"
   | "published";
 
+export type DocumentType =
+  | "research_paper"
+  | "working_paper"
+  | "whitepaper"
+  | "technical_framework"
+  | "project_status_paper"
+  | "other";
+
+export type ProjectAuthorRole = "author" | "co_author";
+
+export interface ProjectAuthor {
+  id: string;
+  project_id: string;
+  profile_id: string;
+  role: ProjectAuthorRole;
+  position: number;
+  created_at: string;
+  profile?: Profile | null;
+}
+
 export type EventCategory =
   | "workshop"
   | "soc_meeting"
@@ -69,12 +89,18 @@ export interface Project {
   title: string;
   abstract: string;
   target_domain: string;
+  document_type: DocumentType;
+  topics: string[];
+  geographic_scope: string[];
+  methodology: string[];
+  data_sources: string[];
   status: ProposalStatus;
   director_feedback: string | null;
   status_reviewed_at: string | null;
   created_at: string;
   updated_at: string;
   author?: Profile | null;
+  co_authors?: ProjectAuthor[];
   draft?: PaperDraft | null;
 }
 

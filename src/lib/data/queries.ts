@@ -3,11 +3,69 @@ import type {
   Application,
   EventItem,
   ExternalReading,
+  PaperDraft,
   Profile,
   Project,
 } from "@/lib/types";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/server";
 import { SAMPLE_AUTHORS, SAMPLE_EVENTS, SAMPLE_PAPERS } from "@/lib/data/samples";
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
+const PAPER_SELECT =
+  "*, author:profiles(*), draft:paper_drafts(*), co_authors:project_authors(*, profile:profiles(*))";
+
+/**
+ * PostgREST embeds the to-many `paper_drafts` relation as an array. Collapse it
+ * to the single most relevant draft (a published one if present, else newest).
+ */
+function normalizeProject(row: unknown): Project {
+  const project = row as Project & {
+    draft?: PaperDraft | PaperDraft[] | null;
+  };
+  const drafts = Array.isArray(project.draft)
+    ? project.draft
+    : project.draft
+      ? [project.draft]
+      : [];
+  const draft =
+    drafts.find((candidate) => candidate.status === "published") ??
+    [...drafts].sort((a, b) => b.version - a.version)[0] ??
+    null;
+  return { ...project, draft };
+}
+
+/** Papers a member authored or co-authored, newest first. */
+async function loadProfilePapers(
+  supabase: SupabaseServerClient,
+  profileId: string,
+): Promise<Project[]> {
+  const [authored, coauthored] = await Promise.all([
+    supabase.from("projects").select(PAPER_SELECT).eq("author_id", profileId),
+    supabase
+      .from("project_authors")
+      .select(`project:projects(${PAPER_SELECT})`)
+      .eq("profile_id", profileId),
+  ]);
+
+  const map = new Map<string, Project>();
+  for (const paper of (authored.data as unknown as unknown[] | null) ?? []) {
+    const project = normalizeProject(paper);
+    map.set(project.id, project);
+  }
+  for (const row of (coauthored.data as unknown as
+    | { project: unknown | null }[]
+    | null) ?? []) {
+    if (row.project) {
+      const project = normalizeProject(row.project);
+      map.set(project.id, project);
+    }
+  }
+
+  return Array.from(map.values()).sort(
+    (a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+  );
+}
 
 export async function getPublishedPapers(): Promise<Project[]> {
   if (!hasSupabaseEnv()) {
@@ -22,16 +80,47 @@ export async function getPublishedPapers(): Promise<Project[]> {
 
   const { data: projects, error } = await supabase
     .from("projects")
-    .select("*, author:profiles(*), draft:paper_drafts(*)")
+    .select(PAPER_SELECT)
     .eq("status", "approved")
     .order("updated_at", { ascending: false });
 
   if (error) return [];
 
   // Only surface projects that have a published draft.
-  return (projects as unknown as Project[]).filter(
-    (p) => p.draft?.status === "published",
-  );
+  return (projects as unknown as unknown[])
+    .map(normalizeProject)
+    .filter((p) => p.draft?.status === "published");
+}
+
+/**
+ * Everything shown in the public library: published papers plus working papers
+ * (which are public-by-design even before they are published).
+ */
+export async function getLibraryPapers(): Promise<Project[]> {
+  if (!hasSupabaseEnv()) {
+    return SAMPLE_PAPERS.map((paper) => ({
+      ...paper,
+      draft: paper.draft ?? null,
+      author: paper.author ?? null,
+    }));
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PAPER_SELECT)
+    .order("updated_at", { ascending: false });
+
+  if (error) return [];
+
+  return (data as unknown as unknown[])
+    .map(normalizeProject)
+    .filter(
+      (p) =>
+        p.draft?.status === "published" ||
+        (p.document_type === "working_paper" && Boolean(p.draft)),
+    );
 }
 
 export async function getEvents(): Promise<EventItem[]> {
@@ -165,15 +254,11 @@ export const getProfileByUsername = cache(async function getProfileByUsername(
     return { profile: null, papers: [] };
   }
 
-  const { data: papers } = await supabase
-    .from("projects")
-    .select("*, author:profiles(*), draft:paper_drafts(*)")
-    .eq("author_id", profile.id)
-    .order("created_at", { ascending: false });
+  const papers = await loadProfilePapers(supabase, profile.id);
 
   return {
     profile: profile as Profile,
-    papers: (papers as Project[]) ?? [],
+    papers,
   };
 });
 
@@ -205,15 +290,11 @@ export const getProfileById = cache(async function getProfileById(
     return { profile: null, papers: [] };
   }
 
-  const { data: papers } = await supabase
-    .from("projects")
-    .select("*, author:profiles(*), draft:paper_drafts(*)")
-    .eq("author_id", profile.id)
-    .order("created_at", { ascending: false });
+  const papers = await loadProfilePapers(supabase, profile.id);
 
   return {
     profile: profile as Profile,
-    papers: (papers as Project[]) ?? [],
+    papers,
   };
 });
 
@@ -226,10 +307,10 @@ export async function getProjectById(id: string): Promise<Project | null> {
 
   const { data, error } = await supabase
     .from("projects")
-    .select("*, author:profiles(*), draft:paper_drafts(*)")
+    .select(PAPER_SELECT)
     .eq("id", id)
     .maybeSingle();
 
   if (error || !data) return null;
-  return data as Project;
+  return normalizeProject(data);
 }

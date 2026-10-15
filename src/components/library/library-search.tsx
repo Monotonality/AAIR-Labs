@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { PaperCard } from "@/components/library/paper-card";
+import { PaperListItem } from "@/components/library/paper-list-item";
+import { authorNameList } from "@/lib/papers";
 import type { Project } from "@/lib/types";
 
 export function LibrarySearch({ papers }: { papers: Project[] }) {
@@ -23,7 +24,7 @@ export function LibrarySearch({ papers }: { papers: Project[] }) {
   const authors = useMemo(() => {
     const set = new Set<string>();
     papers.forEach((p) => {
-      if (p.author?.full_name) set.add(p.author.full_name);
+      for (const entry of authorNameList(p)) set.add(entry);
     });
     return Array.from(set).sort();
   }, [papers]);
@@ -31,16 +32,22 @@ export function LibrarySearch({ papers }: { papers: Project[] }) {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return papers.filter((p) => {
-      const matchesQuery =
-        !q ||
-        p.title.toLowerCase().includes(q) ||
-        p.abstract.toLowerCase().includes(q) ||
-        p.target_domain.toLowerCase().includes(q) ||
-        (p.author?.full_name.toLowerCase().includes(q) ?? false);
+      const domain = p.target_domain?.toLowerCase() ?? "";
+      const names = authorNameList(p);
+      const haystack = [
+        p.title,
+        p.abstract,
+        domain,
+        ...names,
+        ...(p.topics ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      const matchesQuery = !q || haystack.includes(q);
       const matchesDomain =
         selectedDomain === "all" || p.target_domain === selectedDomain;
       const matchesAuthor =
-        selectedAuthor === "all" || p.author?.full_name === selectedAuthor;
+        selectedAuthor === "all" || names.includes(selectedAuthor);
       return matchesQuery && matchesDomain && matchesAuthor;
     });
   }, [papers, query, selectedDomain, selectedAuthor]);
@@ -158,11 +165,11 @@ export function LibrarySearch({ papers }: { papers: Project[] }) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <ul>
             {filtered.map((paper) => (
-              <PaperCard key={paper.id} project={paper} />
+              <PaperListItem key={paper.id} project={paper} />
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </div>

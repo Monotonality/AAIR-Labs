@@ -40,8 +40,11 @@ export default async function ResearcherPage({
 
   const isOwner = user?.id === profile.id;
   const links = displayLinks(profile);
-  const published = papers.filter((p) => p.draft?.status === "published");
-  const active = papers.filter((p) => p.draft?.status !== "published");
+  const isRegularPaper = (paper: (typeof papers)[number]) =>
+    paper.draft?.status === "published" ||
+    paper.document_type === "working_paper";
+  const published = papers.filter(isRegularPaper);
+  const active = papers.filter((p) => !isRegularPaper(p));
   const subtitle = profileSubtitle(profile);
 
   return (
@@ -134,7 +137,7 @@ export default async function ResearcherPage({
 
           {published.length > 0 && (
             <div>
-              <h2 className="mb-6 font-serif text-2xl">Published research</h2>
+              <h2 className="mb-6 font-serif text-2xl">Work</h2>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {published.map((paper) => (
                   <PaperCard key={paper.id} project={paper} />
@@ -172,7 +175,7 @@ export default async function ResearcherPage({
           )}
 
           {published.length === 0 && active.length === 0 && (
-            <p className="text-sm text-ink-45">No published research yet.</p>
+            <p className="text-sm text-ink-45">No work yet.</p>
           )}
 
           <div className="border-t border-line pt-6">
