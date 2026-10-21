@@ -7,7 +7,8 @@ import { Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { paperStorageUrl } from "@/components/library/paper-card";
 import { getProjectById } from "@/lib/data/queries";
-import { documentTypeLabel, projectAuthors } from "@/lib/papers";
+import { projectAuthors } from "@/lib/papers";
+import { proposalCategoryLabel } from "@/lib/proposal-categories";
 
 export const instant = false;
 
@@ -41,19 +42,16 @@ export default async function LibraryPaperPage({
   const project = await getProjectById(id);
 
   const isPublic =
-    project?.draft?.status === "published" ||
-    project?.document_type === "working_paper";
+    project?.status === "approved" && Boolean(project?.draft?.pdf_storage_path);
 
   if (!project || !isPublic) {
     notFound();
   }
 
+  // Fixed storage path: append the draft version so browsers pick up a
+  // replaced PDF after re-upload.
   const pdfUrl = project.draft?.pdf_storage_path
-    ? paperStorageUrl(project.draft.pdf_storage_path)
-    : null;
-
-  const previewUrl = project.draft?.pdf_storage_path
-    ? paperStorageUrl(project.draft.pdf_storage_path)
+    ? `${paperStorageUrl(project.draft.pdf_storage_path)}?v=${project.draft.version}`
     : null;
 
   const pdfFilename = `${project.title
@@ -61,11 +59,11 @@ export default async function LibraryPaperPage({
     .replace(/\s+/g, " ")
     .trim()}.pdf`;
   const pdfDownloadUrl = pdfUrl
-    ? `${pdfUrl}?download=${encodeURIComponent(pdfFilename)}`
+    ? `${pdfUrl}&download=${encodeURIComponent(pdfFilename)}`
     : null;
 
   const authors = projectAuthors(project);
-  const category = documentTypeLabel(project.document_type);
+  const category = proposalCategoryLabel(project.category);
   const uploaded = project.draft?.created_at ?? project.created_at;
   const summary = summarize(project.abstract);
 
@@ -143,7 +141,7 @@ export default async function LibraryPaperPage({
               <Meta label="Format" value="PDF" />
             </dl>
             {project.topics?.length > 0 && (
-              <TagGroup label="Category / Field" tags={project.topics} />
+              <TagGroup label="Topics" tags={project.topics} />
             )}
           </div>
         </div>

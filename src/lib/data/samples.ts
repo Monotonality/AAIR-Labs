@@ -61,10 +61,12 @@ export const SAMPLE_PAPERS: Project[] = [
   {
     id: "00000000-0000-0000-0000-000000000101",
     author_id: SAMPLE_AUTHORS[1].id,
+    proposal_id: null,
     title: "Efficient Fine-Tuning on Consumer GPUs",
     abstract:
       "A practical comparison of LoRA adapters across three 7B-parameter models, measuring VRAM, throughput, and task accuracy on a single consumer GPU.",
     target_domain: "Efficient ML",
+    category: "research",
     document_type: "whitepaper",
     topics: ["Efficient ML", "Fine-Tuning"],
     geographic_scope: [],
@@ -81,10 +83,12 @@ export const SAMPLE_PAPERS: Project[] = [
   {
     id: "00000000-0000-0000-0000-000000000102",
     author_id: SAMPLE_AUTHORS[0].id,
+    proposal_id: null,
     title: "Retrieval-Augmented Tutoring Agents",
     abstract:
       "Design and evaluation of a retrieval-augmented tutoring agent for introductory CS courses, with human-graded response quality results.",
     target_domain: "NLP",
+    category: "research",
     document_type: "research_paper",
     topics: ["NLP", "Education"],
     geographic_scope: [],

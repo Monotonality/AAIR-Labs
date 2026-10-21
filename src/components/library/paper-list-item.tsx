@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { authorNames, documentTypeLabel } from "@/lib/papers";
+import { authorNames } from "@/lib/papers";
+import { proposalCategoryLabel } from "@/lib/proposal-categories";
 import type { Project } from "@/lib/types";
 
 function formatDate(iso: string | null | undefined) {
@@ -14,7 +15,7 @@ function formatDate(iso: string | null | undefined) {
 
 export function PaperListItem({ project }: { project: Project }) {
   const authors = authorNames(project);
-  const category = documentTypeLabel(project.document_type);
+  const category = proposalCategoryLabel(project.category);
   const meta = [authors, category, project.target_domain]
     .filter(Boolean)
     .join(" · ");

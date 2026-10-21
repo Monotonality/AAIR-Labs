@@ -80,3 +80,20 @@ export async function getAllProposals(): Promise<Proposal[]> {
   }
   return (data ?? []).map(asProposal);
 }
+
+/** Approved proposals a director can turn into a project. */
+export async function getApprovedProposals(): Promise<Proposal[]> {
+  if (!hasSupabaseEnv()) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("proposals")
+    .select(PROPOSAL_SELECT)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("getApprovedProposals", error.message);
+    return [];
+  }
+  return (data ?? []).map(asProposal);
+}

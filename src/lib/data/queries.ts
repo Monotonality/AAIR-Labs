@@ -13,7 +13,7 @@ import { SAMPLE_AUTHORS, SAMPLE_EVENTS, SAMPLE_PAPERS } from "@/lib/data/samples
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 const PAPER_SELECT =
-  "*, author:profiles(*), draft:paper_drafts(*), co_authors:project_authors(*, profile:profiles(*))";
+  "*, author:profiles(*), draft:paper_drafts(*), co_authors:project_authors(*, profile:profiles(*)), proposal:proposals(*)";
 
 /**
  * PostgREST embeds the to-many `paper_drafts` relation as an array. Collapse it
@@ -93,8 +93,9 @@ export async function getPublishedPapers(): Promise<Project[]> {
 }
 
 /**
- * Everything shown in the public library: published papers plus working papers
- * (which are public-by-design even before they are published).
+ * Everything shown in the public library: approved projects with an uploaded
+ * working paper. (Draft status is synced on approval, but the PDF is the
+ * source of truth for listing.)
  */
 export async function getLibraryPapers(): Promise<Project[]> {
   if (!hasSupabaseEnv()) {
@@ -110,17 +111,14 @@ export async function getLibraryPapers(): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
     .select(PAPER_SELECT)
+    .eq("status", "approved")
     .order("updated_at", { ascending: false });
 
   if (error) return [];
 
   return (data as unknown as unknown[])
     .map(normalizeProject)
-    .filter(
-      (p) =>
-        p.draft?.status === "published" ||
-        (p.document_type === "working_paper" && Boolean(p.draft)),
-    );
+    .filter((p) => Boolean(p.draft?.pdf_storage_path));
 }
 
 export async function getEvents(): Promise<EventItem[]> {
@@ -309,6 +307,42 @@ export async function getProjectById(id: string): Promise<Project | null> {
     .from("projects")
     .select(PAPER_SELECT)
     .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return normalizeProject(data);
+}
+
+/** Projects the member leads or co-authors, newest first. */
+export async function getMyProjects(profileId: string): Promise<Project[]> {
+  if (!hasSupabaseEnv()) return [];
+  const supabase = await createClient();
+  return loadProfilePapers(supabase, profileId);
+}
+
+/** Every project the caller can see (directors), newest first. */
+export async function getAllProjects(): Promise<Project[]> {
+  if (!hasSupabaseEnv()) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PAPER_SELECT)
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
+  return (data as unknown as unknown[]).map(normalizeProject);
+}
+
+/** The project an approved proposal became, if one exists. */
+export async function getProjectByProposalId(
+  proposalId: string,
+): Promise<Project | null> {
+  if (!hasSupabaseEnv()) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PAPER_SELECT)
+    .eq("proposal_id", proposalId)
     .maybeSingle();
 
   if (error || !data) return null;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PaperStatusBadge } from "@/components/shared/status-badge";
-import { authorNames, documentTypeLabel } from "@/lib/papers";
+import { authorNames } from "@/lib/papers";
+import { proposalCategoryLabel } from "@/lib/proposal-categories";
 import type { Project } from "@/lib/types";
 
 const PAPER_BUCKET = "research-papers";
@@ -54,7 +55,7 @@ export function PaperCard({ project, statusLabel }: PaperCardProps) {
       </div>
       <div className="mt-auto flex items-center justify-between border-t border-line pt-3">
         <span className="text-xs text-ink-45">
-          {documentTypeLabel(project.document_type)} · PDF
+          {proposalCategoryLabel(project.category)} · PDF
         </span>
         <Link
           href={`/library/${project.id}`}

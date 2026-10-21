@@ -40,11 +40,12 @@ export default async function ResearcherPage({
 
   const isOwner = user?.id === profile.id;
   const links = displayLinks(profile);
-  const isRegularPaper = (paper: (typeof papers)[number]) =>
-    paper.draft?.status === "published" ||
-    paper.document_type === "working_paper";
-  const published = papers.filter(isRegularPaper);
-  const active = papers.filter((p) => !isRegularPaper(p));
+  // "Work" is what the public library lists; everything else is in progress
+  // and only visible to the owner, co-authors, and directors (RLS).
+  const isPublished = (paper: (typeof papers)[number]) =>
+    paper.status === "approved" && Boolean(paper.draft?.pdf_storage_path);
+  const published = papers.filter(isPublished);
+  const active = papers.filter((p) => !isPublished(p));
   const subtitle = profileSubtitle(profile);
 
   return (
@@ -161,7 +162,7 @@ export default async function ResearcherPage({
                     </div>
                     {isOwner && (
                       <Link
-                        href="/dashboard/research"
+                        href={`/projects/${paper.id}`}
                         className="inline-flex items-center gap-1.5 border-b-[1.5px] border-ink pb-0.5 text-[13px] font-semibold text-ink transition-colors hover:border-green hover:text-green"
                       >
                         <Pencil className="size-3.5" />

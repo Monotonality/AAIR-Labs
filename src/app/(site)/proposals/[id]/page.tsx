@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Pencil } from "lucide-react";
 
 import { ProposalReviewPanel } from "@/components/proposals/proposal-review-panel";
 import { ProposalSections } from "@/components/proposals/proposal-sections";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { getAuthenticatedUser, isDirector } from "@/lib/auth-helpers";
 import { formatDate } from "@/lib/dates";
 import { getProposalById } from "@/lib/data/proposals";
+import { getProjectByProposalId } from "@/lib/data/queries";
 import { proposalCategoryLabel } from "@/lib/proposal-categories";
 
 export const instant = false;
@@ -29,6 +30,8 @@ export default async function ProposalDetailPage(
 
   const proposal = await getProposalById(id);
   if (!proposal) notFound();
+
+  const project = await getProjectByProposalId(proposal.id);
 
   const user = await getAuthenticatedUser();
   const viewerIsDirector = user ? await isDirector(user) : false;
@@ -105,6 +108,17 @@ export default async function ProposalDetailPage(
                 {isAuthor && !viewerIsDirector
                   ? "Edit and resubmit"
                   : "Edit proposal"}
+              </Link>
+            </Button>
+          </div>
+        )}
+
+        {project && (
+          <div className="mt-6">
+            <Button asChild size="sm" variant="secondary">
+              <Link href={`/projects/${project.id}`}>
+                Open the working project
+                <ArrowUpRight className="size-4" />
               </Link>
             </Button>
           </div>

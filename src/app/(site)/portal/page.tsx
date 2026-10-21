@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { BookOpen, CalendarDays, ClipboardCheck, FileCheck2, FileText, FlaskConical, FolderOpen, Megaphone, Settings, User, Users } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardCheck, ClipboardList, FileCheck2, FileText, FlaskConical, FolderOpen, Library, Megaphone, Settings, User, Users } from "lucide-react";
 
 import { OnboardingCard } from "@/components/portal/onboarding-card";
 import { PageHeader } from "@/components/shared/section-heading";
@@ -134,6 +134,20 @@ export default async function PortalPage() {
               </Button>
             </div>
           </div>
+
+          <div className="flex flex-col gap-4 border border-line bg-surface p-6">
+            <Library className="size-5 text-ink" />
+            <h2 className="font-serif text-2xl">Working Papers</h2>
+            <p className="text-sm leading-relaxed text-ink-70">
+              Open the projects you lead or co-author, see the current working
+              paper, and track director review.
+            </p>
+            <div className="mt-auto">
+              <Button asChild size="sm" variant="secondary">
+                <Link href="/projects">View projects</Link>
+              </Button>
+            </div>
+          </div>
         </div>
 
         {admin && (
@@ -172,6 +186,22 @@ export default async function PortalPage() {
                   <Button asChild size="sm">
                     <Link href="/portal/proposals/review">
                       Review proposals
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 border border-line bg-surface p-6">
+                <ClipboardList className="size-5 text-ink" />
+                <h3 className="font-serif text-2xl">Review Projects</h3>
+                <p className="text-sm leading-relaxed text-ink-70">
+                  Approve or deny working-paper projects, leave feedback for the
+                  team, and reopen approved projects for changes.
+                </p>
+                <div className="mt-auto">
+                  <Button asChild size="sm">
+                    <Link href="/portal/projects/review">
+                      Review projects
                     </Link>
                   </Button>
                 </div>

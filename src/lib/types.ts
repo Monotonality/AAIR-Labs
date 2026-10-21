@@ -118,9 +118,11 @@ export interface Profile {
 export interface Project {
   id: string;
   author_id: string;
+  proposal_id: string | null;
   title: string;
   abstract: string;
   target_domain: string;
+  category: ProposalCategory;
   document_type: DocumentType;
   topics: string[];
   geographic_scope: string[];
@@ -134,6 +136,7 @@ export interface Project {
   author?: Profile | null;
   co_authors?: ProjectAuthor[];
   draft?: PaperDraft | null;
+  proposal?: Proposal | null;
 }
 
 export interface PaperDraft {
