@@ -25,10 +25,10 @@ export function ResearcherCard({ profile }: { profile: Profile }) {
           <img
             src={profile.avatar_url}
             alt=""
-            className="size-11 rounded-full object-cover"
+            className="size-11 shrink-0 rounded-full object-cover"
           />
         ) : (
-          <span className="grid size-11 place-items-center rounded-full bg-ink font-serif text-lg text-paper">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-ink font-serif text-lg text-paper">
             {initials(profile.full_name)}
           </span>
         )}
