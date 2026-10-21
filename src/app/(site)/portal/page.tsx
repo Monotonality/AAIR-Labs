@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { BookOpen, CalendarDays, ClipboardCheck, FileText, FolderOpen, Megaphone, Settings, User, Users } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardCheck, FileCheck2, FileText, FlaskConical, FolderOpen, Megaphone, Settings, User, Users } from "lucide-react";
 
 import { OnboardingCard } from "@/components/portal/onboarding-card";
 import { PageHeader } from "@/components/shared/section-heading";
@@ -120,6 +120,20 @@ export default async function PortalPage() {
               </Button>
             </div>
           </div>
+
+          <div className="flex flex-col gap-4 border border-line bg-surface p-6">
+            <FlaskConical className="size-5 text-ink" />
+            <h2 className="font-serif text-2xl">My Proposals</h2>
+            <p className="text-sm leading-relaxed text-ink-70">
+              Track the proposals you have submitted, their review status, and
+              the public link you can share.
+            </p>
+            <div className="mt-auto">
+              <Button asChild size="sm" variant="secondary">
+                <Link href="/portal/proposals">View my proposals</Link>
+              </Button>
+            </div>
+          </div>
         </div>
 
         {admin && (
@@ -142,6 +156,22 @@ export default async function PortalPage() {
                   <Button asChild size="sm">
                     <Link href="/portal/applications">
                       Review applications
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 border border-line bg-surface p-6">
+                <FileCheck2 className="size-5 text-ink" />
+                <h3 className="font-serif text-2xl">Review Proposals</h3>
+                <p className="text-sm leading-relaxed text-ink-70">
+                  Approve or deny submitted proposals, leave feedback, and set
+                  which approved proposals are listed publicly.
+                </p>
+                <div className="mt-auto">
+                  <Button asChild size="sm">
+                    <Link href="/portal/proposals/review">
+                      Review proposals
                     </Link>
                   </Button>
                 </div>

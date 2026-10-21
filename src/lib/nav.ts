@@ -5,6 +5,7 @@ export type NavItem = {
 
 export const mainNav: NavItem[] = [
   { href: "/library", label: "Library" },
+  { href: "/proposals", label: "Current Research" },
   { href: "/events", label: "Events" },
   { href: "/researchers", label: "Researchers" },
 ];
@@ -12,6 +13,7 @@ export const mainNav: NavItem[] = [
 export const footerNav: Record<string, NavItem[]> = {
   explore: [
     { href: "/library", label: "Public Library" },
+    { href: "/proposals", label: "Current Research" },
     { href: "/events", label: "Event Calendar" },
     { href: "/researchers", label: "Researchers" },
   ],

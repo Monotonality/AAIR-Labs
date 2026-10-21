@@ -6,6 +6,38 @@ export type ProposalStatus =
   | "rejected"
   | "revision_requested";
 
+export type ProposalCategory = "research" | "whitepaper" | "analysis";
+
+export interface ProposalReference {
+  title: string;
+  url: string;
+}
+
+export interface ProposalDetails {
+  priorWorks: ProposalReference[];
+  deliverables: string;
+  [key: string]: string | ProposalReference[] | undefined;
+}
+
+export interface Proposal {
+  id: string;
+  author_id: string;
+  title: string;
+  summary: string;
+  category: ProposalCategory;
+  details: ProposalDetails;
+  status: ProposalStatus;
+  is_public: boolean;
+  director_feedback: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  created_at: string;
+  updated_at: string;
+  author?: Profile | null;
+}
+
+export type ProposalReviewDecision = "approve" | "deny";
+
 export type ApplicationStatus = "pending" | "approved" | "rejected";
 
 export interface ApplicationFormData {
