@@ -29,6 +29,7 @@ export function ProjectDetailsForm({ project, isDirector }: ProjectDetailsFormPr
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [title, setTitle] = useState(project.title);
   const [abstract, setAbstract] = useState(project.abstract);
   const [targetDomain, setTargetDomain] = useState(project.target_domain ?? "");
@@ -38,11 +39,10 @@ export function ProjectDetailsForm({ project, isDirector }: ProjectDetailsFormPr
   const [dataSources, setDataSources] = useState(toListText(project.data_sources));
   const [category, setCategory] = useState<ProposalCategory>(project.category);
 
-  const resubmits = !isDirector && project.status === "rejected";
-
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setSaved(false);
     setIsSubmitting(true);
 
     const payload = {
@@ -63,7 +63,8 @@ export function ProjectDetailsForm({ project, isDirector }: ProjectDetailsFormPr
       return;
     }
 
-    router.push(`/projects/${project.id}`);
+    setIsSubmitting(false);
+    setSaved(true);
     router.refresh();
   }
 
@@ -104,6 +105,7 @@ export function ProjectDetailsForm({ project, isDirector }: ProjectDetailsFormPr
       className="space-y-6 rounded-[2px] border border-line bg-surface p-6"
     >
       {error && <Alert variant="destructive">{error}</Alert>}
+      {saved && <Alert>Changes saved.</Alert>}
 
       <fieldset className="space-y-3">
         <legend className="font-serif text-xl">Project type</legend>
@@ -213,16 +215,11 @@ export function ProjectDetailsForm({ project, isDirector }: ProjectDetailsFormPr
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6">
         <p className="max-w-lg text-xs leading-relaxed text-ink-45">
-          {resubmits
-            ? "Saving sends the project back to the Director of Research for another review."
-            : "Changes take effect immediately. Approved projects are locked until a director reopens them."}
+          Changes take effect immediately. To send new work for review,
+          submit a PDF above.
         </p>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : resubmits
-              ? "Save and resubmit"
-              : "Save changes"}
+          {isSubmitting ? "Saving..." : "Save changes"}
         </Button>
       </div>
     </form>

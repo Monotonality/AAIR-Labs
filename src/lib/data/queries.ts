@@ -6,6 +6,7 @@ import type {
   PaperDraft,
   Profile,
   Project,
+  ProjectReviewEvent,
 } from "@/lib/types";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/server";
 import { SAMPLE_AUTHORS, SAMPLE_EVENTS, SAMPLE_PAPERS } from "@/lib/data/samples";
@@ -313,13 +314,6 @@ export async function getProjectById(id: string): Promise<Project | null> {
   return normalizeProject(data);
 }
 
-/** Projects the member leads or co-authors, newest first. */
-export async function getMyProjects(profileId: string): Promise<Project[]> {
-  if (!hasSupabaseEnv()) return [];
-  const supabase = await createClient();
-  return loadProfilePapers(supabase, profileId);
-}
-
 /** Every project the caller can see (directors), newest first. */
 export async function getAllProjects(): Promise<Project[]> {
   if (!hasSupabaseEnv()) return [];
@@ -347,4 +341,50 @@ export async function getProjectByProposalId(
 
   if (error || !data) return null;
   return normalizeProject(data);
+}
+/**
+ * Projects still in progress (not yet approved/published), most recently
+ * active first. RLS decides the scope: approved members and directors see all.
+ */
+export async function getActiveProjects(): Promise<Project[]> {
+  if (!hasSupabaseEnv()) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PAPER_SELECT)
+    .neq("status", "approved")
+    .order("updated_at", { ascending: false });
+
+  if (error) return [];
+  return (data as unknown as unknown[]).map(normalizeProject);
+}
+
+/** Projects the member leads, most recently active first. */
+export async function getLedProjects(profileId: string): Promise<Project[]> {
+  if (!hasSupabaseEnv()) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PAPER_SELECT)
+    .eq("author_id", profileId)
+    .order("updated_at", { ascending: false });
+
+  if (error) return [];
+  return (data as unknown as unknown[]).map(normalizeProject);
+}
+
+/** Submission and review history for a project, newest first. */
+export async function getProjectReviewEvents(
+  projectId: string,
+): Promise<ProjectReviewEvent[]> {
+  if (!hasSupabaseEnv()) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_review_events")
+    .select("*, actor:profiles(id, full_name, username)")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
+  return (data as ProjectReviewEvent[]) ?? [];
 }

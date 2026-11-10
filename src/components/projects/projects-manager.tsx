@@ -26,11 +26,9 @@ const STATUS_ORDER: Record<ProposalStatus, number> = {
 export function ProjectsManager({ projects }: { projects: Project[] }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      projects.map((project) => [project.id, project.director_feedback ?? ""]),
-    ),
-  );
+  // Starts empty: each decision is logged to the history, so prefilling the
+  // last feedback would repeat it.
+  const [feedback, setFeedback] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -42,7 +40,11 @@ export function ProjectsManager({ projects }: { projects: Project[] }) {
     setBusyId(id);
     startTransition(async () => {
       const result = await work();
-      if (!result.ok) setError(result.error ?? "Something went wrong.");
+      if (result.ok) {
+        setFeedback((prev) => ({ ...prev, [id]: "" }));
+      } else {
+        setError(result.error ?? "Something went wrong.");
+      }
       setBusyId(null);
       router.refresh();
     });
@@ -53,8 +55,8 @@ export function ProjectsManager({ projects }: { projects: Project[] }) {
       <div className="border border-dashed border-line bg-surface px-6 py-16 text-center">
         <p className="font-serif text-2xl text-ink">No projects yet</p>
         <p className="mt-2 text-sm text-ink-70">
-          Create a project from the projects page, then upload a working paper
-          for review here.
+          Create a project from Active Research. Its submissions show up here
+          for review.
         </p>
       </div>
     );
@@ -82,7 +84,7 @@ export function ProjectsManager({ projects }: { projects: Project[] }) {
                   </p>
                   <h2 className="mt-1 font-serif text-2xl leading-tight">
                     <Link
-                      href={`/projects/${project.id}`}
+                      href={`/portal/active-research/${project.id}`}
                       className="underline-offset-4 hover:underline"
                     >
                       {project.title}
@@ -131,7 +133,7 @@ export function ProjectsManager({ projects }: { projects: Project[] }) {
                       [project.id]: e.target.value,
                     }))
                   }
-                  placeholder="What is complete, what is missing, and what to change before resubmitting."
+                  placeholder="What is complete, what is missing, and what to change. Required when denying."
                   maxLength={2000}
                   disabled={busy}
                 />
@@ -147,12 +149,17 @@ export function ProjectsManager({ projects }: { projects: Project[] }) {
                     )
                   }
                 >
-                  Approve
+                  Approve and publish
                 </Button>
                 <Button
                   size="sm"
                   variant="destructive"
-                  disabled={busy || project.status === "rejected"}
+                  disabled={
+                    busy ||
+                    project.status !== "pending" ||
+                    !hasDraft ||
+                    !(feedback[project.id] ?? "").trim()
+                  }
                   onClick={() =>
                     run(project.id, () =>
                       reviewProject(project.id, "deny", feedback[project.id]),
@@ -172,7 +179,7 @@ export function ProjectsManager({ projects }: { projects: Project[] }) {
                   </Button>
                 )}
                 <Link
-                  href={`/projects/${project.id}`}
+                  href={`/portal/active-research/${project.id}`}
                   className="inline-flex items-center gap-1 text-xs font-semibold text-ink hover:underline underline-offset-4"
                 >
                   Open project

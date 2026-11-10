@@ -79,7 +79,7 @@ export function ProjectCreateForm({ proposals, members }: ProjectCreateFormProps
       return;
     }
 
-    router.push(`/projects/${result.id}`);
+    router.push(`/portal/active-research/${result.id}`);
     router.refresh();
   }
 
@@ -211,16 +211,16 @@ export function ProjectCreateForm({ proposals, members }: ProjectCreateFormProps
           ))}
         </select>
         <p className="text-xs text-ink-45">
-          The lead researcher edits the details and uploads working-paper
-          versions.
+          The lead manages the details, tags, and team, and submits PDFs for
+          review.
         </p>
       </div>
 
       <fieldset className="space-y-3">
         <legend className="font-serif text-xl">Co-authors</legend>
         <p className="text-sm text-ink-70">
-          Optional. Co-authors can open the project and read everything,
-          including uploaded versions, but they cannot edit or upload.
+          Optional. The lead can change the team later. Co-authors can read
+          everything but cannot edit or submit.
         </p>
         {coAuthorCandidates.length === 0 ? (
           <p className="text-xs text-ink-45">No other members to choose from.</p>
@@ -255,8 +255,8 @@ export function ProjectCreateForm({ proposals, members }: ProjectCreateFormProps
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6">
         <p className="max-w-lg text-xs leading-relaxed text-ink-45">
-          The project starts as pending. The team then uploads the working
-          paper, and directors approve or deny it from the review queue.
+          The lead sees the project under My Research, submits PDFs there,
+          and directors approve or deny each submission.
         </p>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating..." : "Create project"}

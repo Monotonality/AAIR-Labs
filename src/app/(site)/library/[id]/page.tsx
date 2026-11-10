@@ -5,9 +5,8 @@ import { connection } from "next/server";
 import { Download, FileText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { paperStorageUrl } from "@/components/library/paper-card";
 import { getProjectById } from "@/lib/data/queries";
-import { projectAuthors } from "@/lib/papers";
+import { paperPdfUrl, projectAuthors } from "@/lib/papers";
 import { proposalCategoryLabel } from "@/lib/proposal-categories";
 
 export const instant = false;
@@ -48,10 +47,9 @@ export default async function LibraryPaperPage({
     notFound();
   }
 
-  // Fixed storage path: append the draft version so browsers pick up a
-  // replaced PDF after re-upload.
+  // Served through the app (private bucket); the version busts browser caches.
   const pdfUrl = project.draft?.pdf_storage_path
-    ? `${paperStorageUrl(project.draft.pdf_storage_path)}?v=${project.draft.version}`
+    ? paperPdfUrl(project.id, project.draft.version)
     : null;
 
   const pdfFilename = `${project.title

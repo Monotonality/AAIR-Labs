@@ -4,26 +4,6 @@ import { authorNames } from "@/lib/papers";
 import { proposalCategoryLabel } from "@/lib/proposal-categories";
 import type { Project } from "@/lib/types";
 
-const PAPER_BUCKET = "research-papers";
-
-export function paperStorageUrl(path: string) {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!base) return path;
-  const trimmed = path.replace(/^\/+/, "");
-  const key = trimmed.startsWith(`${PAPER_BUCKET}/`)
-    ? trimmed.slice(PAPER_BUCKET.length + 1)
-    : trimmed;
-  const encoded = key
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-  return `${base}/storage/v1/object/public/${PAPER_BUCKET}/${encoded}`;
-}
-
-export function paperPreviewUrl(path: string) {
-  return paperStorageUrl(path.replace(/\.pdf$/i, "-preview.jpg"));
-}
-
 interface PaperCardProps {
   project: Project;
   statusLabel?: string;
