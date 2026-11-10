@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { PAPER_BUCKET, paperStorageKey } from "@/lib/papers";
-import { createAdminClient, hasServiceRoleEnv } from "@/lib/supabase/admin";
+import { createServiceClient, hasServiceRoleEnv } from "@/lib/supabase/admin";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/server";
 
 const SIGNED_URL_SECONDS = 60;
@@ -35,7 +35,7 @@ export async function GET(request: Request, ctx: RouteContext<"/api/papers/[id]/
   // ?download=<filename> asks the browser to save rather than display it.
   const download = new URL(request.url).searchParams.get("download")?.slice(0, 200);
 
-  const admin = await createAdminClient();
+  const admin = createServiceClient();
   const { data: signed, error: signError } = await admin.storage
     .from(PAPER_BUCKET)
     .createSignedUrl(

@@ -5,7 +5,7 @@ import type { User } from "@supabase/supabase-js";
 
 import { getAuthenticatedUser, isDirector } from "@/lib/auth-helpers";
 import { DRAFT_STAGE_VALUES, PAPER_BUCKET, paperStorageKey } from "@/lib/papers";
-import { createAdminClient, hasServiceRoleEnv } from "@/lib/supabase/admin";
+import { createServiceClient, hasServiceRoleEnv } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { DraftStage, ProposalReviewDecision } from "@/lib/types";
 import {
@@ -282,7 +282,7 @@ export async function setProjectMembers(
 async function removeOldPaperFiles(projectId: string, keepPath: string, oldPaths: string[]) {
   if (!hasServiceRoleEnv()) return;
   try {
-    const bucket = (await createAdminClient()).storage.from(PAPER_BUCKET);
+    const bucket = createServiceClient().storage.from(PAPER_BUCKET);
 
     const doomed = new Set<string>();
     const folders = new Set<string>([projectId]);

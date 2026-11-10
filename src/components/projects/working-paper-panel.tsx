@@ -34,6 +34,9 @@ export function WorkingPaperPanel({ project, canEdit, manageHref }: WorkingPaper
   const uploadAllowed = canEdit && !locked;
   const stageLabel = draftStageLabel(draft?.stage);
   const defaultStage: DraftStage = draft?.stage ?? (draft ? "working_paper" : "whitepaper");
+  // Controlled so clearing the file after an upload keeps the chosen stage
+  // (form.reset() would snap an uncontrolled select back to its first value).
+  const [stage, setStage] = useState<DraftStage>(defaultStage);
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,7 +49,8 @@ export function WorkingPaperPanel({ project, canEdit, manageHref }: WorkingPaper
         setError(result.error);
         return;
       }
-      form.reset();
+      const fileInput = form.elements.namedItem("file");
+      if (fileInput instanceof HTMLInputElement) fileInput.value = "";
       router.refresh();
     });
   }
@@ -112,7 +116,8 @@ export function WorkingPaperPanel({ project, canEdit, manageHref }: WorkingPaper
             <select
               id="working-paper-stage"
               name="stage"
-              defaultValue={defaultStage}
+              value={stage}
+              onChange={(e) => setStage(e.target.value as DraftStage)}
               disabled={isPending}
               className={SELECT_CLASS}
             >
