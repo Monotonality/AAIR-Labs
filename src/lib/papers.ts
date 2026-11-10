@@ -71,3 +71,21 @@ export function authorNameList(project: Project) {
 export function authorNames(project: Project) {
   return authorNameList(project).join(", ");
 }
+
+export const PAPER_BUCKET = "research-papers";
+
+/** Object key inside the bucket (older rows may include the bucket name). */
+export function paperStorageKey(path: string) {
+  const trimmed = path.replace(/^\/+/, "");
+  return trimmed.startsWith(`${PAPER_BUCKET}/`)
+    ? trimmed.slice(PAPER_BUCKET.length + 1)
+    : trimmed;
+}
+
+/**
+ * The app URL for a project's current PDF. The bucket is private; this route
+ * checks the viewer can read the project, then redirects to a signed URL.
+ */
+export function paperPdfUrl(projectId: string, version?: number | null) {
+  return `/api/papers/${projectId}/pdf${version ? `?v=${version}` : ""}`;
+}

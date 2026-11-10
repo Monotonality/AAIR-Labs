@@ -6,13 +6,12 @@ import { useRouter } from "next/navigation";
 import { FileDown, Upload } from "lucide-react";
 
 import { uploadWorkingPaper } from "@/lib/actions/projects";
-import { paperStorageUrl } from "@/components/library/paper-card";
 import { PaperStatusBadge } from "@/components/shared/status-badge";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/dates";
-import { DRAFT_STAGES, draftStageLabel } from "@/lib/papers";
+import { DRAFT_STAGES, draftStageLabel, paperPdfUrl } from "@/lib/papers";
 import type { DraftStage, Project } from "@/lib/types";
 
 const SELECT_CLASS =
@@ -78,7 +77,7 @@ export function WorkingPaperPanel({ project, canEdit, manageHref }: WorkingPaper
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-ink-70">
           <span>Submitted {formatDate(draft.updated_at || draft.created_at)}</span>
           <a
-            href={`${paperStorageUrl(draft.pdf_storage_path)}?v=${draft.version}`}
+            href={paperPdfUrl(project.id, draft.version)}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 font-semibold text-ink hover:underline underline-offset-4"
@@ -96,7 +95,7 @@ export function WorkingPaperPanel({ project, canEdit, manageHref }: WorkingPaper
 
       {draft?.pdf_storage_path && (
         <p className="mt-2 text-xs text-ink-45">
-          Only the newest PDF is kept. Each upload replaces the previous file;
+          Only the newest PDF is kept. Each upload deletes the previous file;
           the review history keeps a record of every submission.
         </p>
       )}

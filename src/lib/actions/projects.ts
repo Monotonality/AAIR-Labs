@@ -4,13 +4,10 @@ import { revalidatePath } from "next/cache";
 import type { User } from "@supabase/supabase-js";
 
 import { getAuthenticatedUser, isDirector } from "@/lib/auth-helpers";
-import { DRAFT_STAGE_VALUES } from "@/lib/papers";
+import { DRAFT_STAGE_VALUES, PAPER_BUCKET, paperStorageKey } from "@/lib/papers";
+import { createAdminClient, hasServiceRoleEnv } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type {
-  DraftStage,
-  ProjectEventKind,
-  ProposalReviewDecision,
-} from "@/lib/types";
+import type { DraftStage, ProposalReviewDecision } from "@/lib/types";
 import {
   parseProjectCreate,
   parseProjectDetails,
@@ -20,10 +17,8 @@ import {
 } from "@/lib/validation/projects";
 
 const MAX_BYTES = 20 * 1024 * 1024; // 20MB, matches the bucket limit.
-const WORKING_PAPER_FILE = "working-paper.pdf"; // fixed path → newest replaces the old object.
 
 type ActionResult = { ok: true; id: string } | { ok: false; error: string };
-type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 function revalidateProjects(id?: string) {
   revalidatePath("/portal");
@@ -63,27 +58,6 @@ async function fetchProjectRole(
     isLead: data.author_id === user.id,
     isDirector: await isDirector(user),
   };
-}
-
-/** Append one entry to the project's review history. */
-async function logEvent(
-  supabase: SupabaseServerClient,
-  event: {
-    project_id: string;
-    actor_id: string;
-    kind: ProjectEventKind;
-    body?: string | null;
-    draft_version?: number | null;
-    stage?: DraftStage | null;
-  },
-): Promise<string | null> {
-  const { error } = await supabase.from("project_review_events").insert({
-    body: null,
-    draft_version: null,
-    stage: null,
-    ...event,
-  });
-  return error ? `Saved, but the history entry failed: ${error.message}` : null;
 }
 
 /** Directors start a project, optionally from an approved proposal. */
@@ -301,9 +275,47 @@ export async function setProjectMembers(
 }
 
 /**
- * The lead or a director submits a PDF. The object path is fixed per project,
- * so each upload replaces the previous file; the single draft row moves to the
- * next version. A denied project goes back to pending for another review.
+ * Delete every stored PDF for the project except `keepPath`: the project's own
+ * folder plus any legacy `<user>/<project>/…` folders its drafts pointed at.
+ * Best effort; a failure leaves an orphan file but never breaks the upload.
+ */
+async function removeOldPaperFiles(projectId: string, keepPath: string, oldPaths: string[]) {
+  if (!hasServiceRoleEnv()) return;
+  try {
+    const bucket = (await createAdminClient()).storage.from(PAPER_BUCKET);
+
+    const doomed = new Set<string>();
+    const folders = new Set<string>([projectId]);
+    for (const raw of oldPaths) {
+      const key = paperStorageKey(raw);
+      if (key !== keepPath) doomed.add(key);
+      const dir = key.split("/").slice(0, -1);
+      if (dir.includes(projectId)) folders.add(dir.join("/"));
+    }
+
+    for (const folder of folders) {
+      const { data } = await bucket.list(folder, { limit: 1000 });
+      for (const item of data ?? []) {
+        if (!item.id) continue; // sub-folder
+        const name = `${folder}/${item.name}`;
+        if (name !== keepPath) doomed.add(name);
+      }
+    }
+
+    if (doomed.size > 0) {
+      const { error } = await bucket.remove([...doomed]);
+      if (error) console.error("Could not remove old paper files", projectId, error.message);
+    }
+  } catch (error) {
+    console.error("Could not remove old paper files", projectId, error);
+  }
+}
+
+/**
+ * The lead or a director submits a PDF. The file goes to a new object, then
+ * one database call records the new version, moves a denied project back to
+ * pending, and logs the submission. Only after that succeeds are the older
+ * files deleted, so a failure never leaves the project pointing at nothing.
  */
 export async function uploadWorkingPaper(
   id: string,
@@ -343,63 +355,43 @@ export async function uploadWorkingPaper(
 
   const supabase = await createClient();
 
-  const { data: existing, error: draftError } = await supabase
+  const { data: drafts, error: draftError } = await supabase
     .from("paper_drafts")
-    .select("id, version")
-    .eq("project_id", id)
-    .order("version", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .select("pdf_storage_path")
+    .eq("project_id", id);
   if (draftError) return { ok: false, error: draftError.message };
+  const oldPaths = (drafts ?? [])
+    .map((row) => row.pdf_storage_path as string | null)
+    .filter((path): path is string => Boolean(path));
 
-  const version = (existing?.version ?? 0) + 1;
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const storagePath = `${id}/${WORKING_PAPER_FILE}`;
+  const storagePath = `${id}/${crypto.randomUUID()}.pdf`;
 
   const { error: uploadError } = await supabase.storage
-    .from("research-papers")
-    .upload(storagePath, bytes, {
-      contentType: "application/pdf",
-      upsert: true,
-    });
+    .from(PAPER_BUCKET)
+    .upload(storagePath, bytes, { contentType: "application/pdf", upsert: false });
   if (uploadError) return { ok: false, error: uploadError.message };
 
-  const draftFields = {
-    version,
-    stage,
-    pdf_storage_path: storagePath,
-    status: "under_review" as const,
-    published_at: null,
-  };
-  const { error: upsertError } = existing
-    ? await supabase.from("paper_drafts").update(draftFields).eq("id", existing.id)
-    : await supabase.from("paper_drafts").insert({ project_id: id, ...draftFields });
-  if (upsertError) return { ok: false, error: upsertError.message };
-
-  const { error: projectError } = await supabase
-    .from("projects")
-    .update({
-      status: role.status === "rejected" ? "pending" : role.status,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id);
-  if (projectError) return { ok: false, error: projectError.message };
-
-  const historyError = await logEvent(supabase, {
-    project_id: id,
-    actor_id: user.id,
-    kind: "submitted",
-    draft_version: version,
-    stage,
+  const { error: submitError } = await supabase.rpc("submit_project_draft", {
+    p_project_id: id,
+    p_stage: stage,
+    p_path: storagePath,
   });
+  if (submitError) {
+    await supabase.storage.from(PAPER_BUCKET).remove([storagePath]);
+    return { ok: false, error: submitError.message };
+  }
+
+  await removeOldPaperFiles(id, storagePath, oldPaths);
 
   revalidateProjects(id);
-  return historyError ? { ok: false, error: historyError } : { ok: true, id };
+  return { ok: true, id };
 }
 
 /**
  * Director approve/deny of the current PDF. Approving publishes the paper
- * (library + researcher profiles); denying requires a reason.
+ * (library + researcher profiles); denying requires a reason. Runs as one
+ * database transaction.
  */
 export async function reviewProject(
   id: string,
@@ -423,61 +415,18 @@ export async function reviewProject(
   }
 
   const supabase = await createClient();
-  const { data: project, error: fetchError } = await supabase
-    .from("projects")
-    .select("id, status, draft:paper_drafts(id, version, stage, pdf_storage_path)")
-    .eq("id", id)
-    .maybeSingle();
-  if (fetchError) return { ok: false, error: fetchError.message };
-  if (!project) return { ok: false, error: "Project not found." };
-
-  const drafts = (project.draft ?? []) as {
-    id: string;
-    version: number;
-    stage: DraftStage | null;
-    pdf_storage_path: string | null;
-  }[];
-  const current = [...drafts].sort((a, b) => b.version - a.version)[0];
-  if (!current?.pdf_storage_path) {
-    return { ok: false, error: "There is no PDF to review yet." };
-  }
-
-  const now = new Date().toISOString();
-  const { error } = await supabase
-    .from("projects")
-    .update({
-      status: decision === "approve" ? "approved" : "rejected",
-      director_feedback: comment.data || null,
-      status_reviewed_at: now,
-      updated_at: now,
-    })
-    .eq("id", id);
+  const { error } = await supabase.rpc("review_project", {
+    p_project_id: id,
+    p_decision: decision,
+    p_body: comment.data,
+  });
   if (error) return { ok: false, error: error.message };
 
-  const { error: draftError } = await supabase
-    .from("paper_drafts")
-    .update(
-      decision === "approve"
-        ? { status: "published", published_at: now }
-        : { status: "revision_required", published_at: null },
-    )
-    .eq("project_id", id);
-  if (draftError) return { ok: false, error: draftError.message };
-
-  const historyError = await logEvent(supabase, {
-    project_id: id,
-    actor_id: user.id,
-    kind: decision === "approve" ? "approved" : "denied",
-    body: comment.data || null,
-    draft_version: current.version,
-    stage: current.stage,
-  });
-
   revalidateProjects(id);
-  return historyError ? { ok: false, error: historyError } : { ok: true, id };
+  return { ok: true, id };
 }
 
-/** Director comment without a decision. */
+/** Director comment without a decision. The database sets the timestamp. */
 export async function addProjectComment(
   id: string,
   body: unknown,
@@ -521,39 +470,9 @@ export async function reopenProject(id: string): Promise<ActionResult> {
   }
 
   const supabase = await createClient();
-  const { data: project, error: fetchError } = await supabase
-    .from("projects")
-    .select("id, status")
-    .eq("id", id)
-    .maybeSingle();
-  if (fetchError) return { ok: false, error: fetchError.message };
-  if (!project) return { ok: false, error: "Project not found." };
-  if (project.status !== "approved") {
-    return { ok: false, error: "Only an approved project can be reopened." };
-  }
-
-  const { error } = await supabase
-    .from("projects")
-    .update({
-      status: "pending",
-      status_reviewed_at: null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id);
+  const { error } = await supabase.rpc("reopen_project", { p_project_id: id });
   if (error) return { ok: false, error: error.message };
 
-  const { error: draftError } = await supabase
-    .from("paper_drafts")
-    .update({ status: "under_review", published_at: null })
-    .eq("project_id", id);
-  if (draftError) return { ok: false, error: draftError.message };
-
-  const historyError = await logEvent(supabase, {
-    project_id: id,
-    actor_id: user.id,
-    kind: "reopened",
-  });
-
   revalidateProjects(id);
-  return historyError ? { ok: false, error: historyError } : { ok: true, id };
+  return { ok: true, id };
 }
