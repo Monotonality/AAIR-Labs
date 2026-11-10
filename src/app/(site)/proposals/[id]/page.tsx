@@ -116,7 +116,7 @@ export default async function ProposalDetailPage(
         {project && (
           <div className="mt-6">
             <Button asChild size="sm" variant="secondary">
-              <Link href={`/projects/${project.id}`}>
+              <Link href={`/portal/active-research/${project.id}`}>
                 Open the working project
                 <ArrowUpRight className="size-4" />
               </Link>

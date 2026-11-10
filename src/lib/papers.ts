@@ -1,5 +1,6 @@
 import type {
   DocumentType,
+  DraftStage,
   Profile,
   Project,
   ProjectAuthorRole,
@@ -16,6 +17,23 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
 
 export function documentTypeLabel(type: DocumentType | null | undefined) {
   return (type && DOCUMENT_TYPE_LABELS[type]) || "Research Paper";
+}
+
+/** Submission stages, in the order a project usually moves through them. */
+export const DRAFT_STAGES: { value: DraftStage; label: string }[] = [
+  { value: "whitepaper", label: "Initial scope whitepaper" },
+  { value: "project_status_paper", label: "Project status paper" },
+  { value: "working_paper", label: "Working draft" },
+  { value: "research_paper", label: "Final paper" },
+];
+
+export const DRAFT_STAGE_VALUES = DRAFT_STAGES.map((s) => s.value) as [
+  DraftStage,
+  ...DraftStage[],
+];
+
+export function draftStageLabel(stage: DocumentType | null | undefined) {
+  return DRAFT_STAGES.find((s) => s.value === stage)?.label ?? null;
 }
 
 export interface ProjectAuthorEntry {

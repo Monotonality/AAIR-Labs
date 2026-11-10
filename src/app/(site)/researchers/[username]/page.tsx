@@ -162,7 +162,7 @@ export default async function ResearcherPage({
                     </div>
                     {isOwner && (
                       <Link
-                        href={`/projects/${paper.id}`}
+                        href={`/portal/active-research/${paper.id}`}
                         className="inline-flex items-center gap-1.5 border-b-[1.5px] border-ink pb-0.5 text-[13px] font-semibold text-ink transition-colors hover:border-green hover:text-green"
                       >
                         <Pencil className="size-3.5" />

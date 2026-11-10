@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { BookOpen, CalendarDays, ClipboardCheck, ClipboardList, FileCheck2, FileText, FlaskConical, FolderOpen, Library, Megaphone, Settings, User, Users } from "lucide-react";
+import { BookOpen, CalendarDays, ClipboardCheck, ClipboardList, FileCheck2, FileText, FlaskConical, FolderOpen, Library, Megaphone, NotebookPen, Settings, User, Users } from "lucide-react";
 
 import { OnboardingCard } from "@/components/portal/onboarding-card";
 import { PageHeader } from "@/components/shared/section-heading";
 import { Button } from "@/components/ui/button";
 import { getAuthenticatedUser, isAdmin } from "@/lib/auth-helpers";
-import { getProfileById, isApprovedMember } from "@/lib/data/queries";
+import { getLedProjects, getProfileById, isApprovedMember } from "@/lib/data/queries";
 
 export const instant = false;
 
@@ -27,6 +27,7 @@ export default async function PortalPage() {
   const { profile } = await getProfileById(user.id);
   const admin = await isAdmin(user);
   const approved = await isApprovedMember(user.id);
+  const ledProjects = await getLedProjects(user.id);
 
   return (
     <>
@@ -135,16 +136,42 @@ export default async function PortalPage() {
             </div>
           </div>
 
+          {ledProjects.length > 0 && (
+            <div className="flex flex-col gap-4 border border-ink bg-surface p-6">
+              <NotebookPen className="size-5 text-ink" />
+              <h2 className="font-serif text-2xl">My Research</h2>
+              <p className="text-sm leading-relaxed text-ink-70">
+                {ledProjects.length === 1
+                  ? `You lead "${ledProjects[0].title}". Edit it, manage the team, and submit PDFs for review.`
+                  : `You lead ${ledProjects.length} projects. Edit them, manage the teams, and submit PDFs for review.`}
+              </p>
+              <div className="mt-auto">
+                <Button asChild size="sm">
+                  <Link
+                    href={
+                      ledProjects.length === 1
+                        ? `/portal/my-research/${ledProjects[0].id}`
+                        : "/portal/my-research"
+                    }
+                  >
+                    Open My Research
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-4 border border-line bg-surface p-6">
             <Library className="size-5 text-ink" />
-            <h2 className="font-serif text-2xl">Working Papers</h2>
+            <h2 className="font-serif text-2xl">Active Research</h2>
             <p className="text-sm leading-relaxed text-ink-70">
-              Open the projects you lead or co-author, see the current working
-              paper, and track director review.
+              {approved || admin
+                ? "Browse every project in progress, read the latest drafts, and follow director feedback."
+                : "Every project in progress, open to members once your application is approved."}
             </p>
             <div className="mt-auto">
               <Button asChild size="sm" variant="secondary">
-                <Link href="/projects">View projects</Link>
+                <Link href="/portal/active-research">View active research</Link>
               </Button>
             </div>
           </div>
@@ -195,8 +222,8 @@ export default async function PortalPage() {
                 <ClipboardList className="size-5 text-ink" />
                 <h3 className="font-serif text-2xl">Review Projects</h3>
                 <p className="text-sm leading-relaxed text-ink-70">
-                  Approve or deny working-paper projects, leave feedback for the
-                  team, and reopen approved projects for changes.
+                  Approve (publish) or deny submitted papers, comment, and create
+                  new projects.
                 </p>
                 <div className="mt-auto">
                   <Button asChild size="sm">

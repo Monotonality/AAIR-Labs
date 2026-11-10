@@ -93,3 +93,47 @@ export function parseProjectCreate(
     data: { ...result.data, co_author_ids: coAuthorIds },
   };
 }
+
+const projectMembersFields = {
+  // Directors only; a lead's submission omits it and keeps the current lead.
+  lead_id: z.string().trim().min(1).optional(),
+  co_author_ids: z.array(z.string().trim().min(1)).max(30, "Keep the team under 30 people."),
+} as const;
+
+export type ProjectMembersInput = z.infer<z.ZodObject<typeof projectMembersFields>>;
+
+export function parseProjectMembers(
+  input: unknown,
+): ParseResult<ProjectMembersInput> {
+  const result = z.object(projectMembersFields).safeParse(input);
+  if (!result.success) {
+    return { ok: false, error: firstError(result.error, "Check the team members.") };
+  }
+  return {
+    ok: true,
+    data: {
+      ...result.data,
+      co_author_ids: Array.from(new Set(result.data.co_author_ids)),
+    },
+  };
+}
+
+const reviewCommentSchema = z
+  .string()
+  .trim()
+  .max(2000, "Comments must be 2,000 characters or fewer.");
+
+/** Trimmed comment text, or an error when it is required and empty. */
+export function parseReviewComment(
+  input: unknown,
+  required: boolean,
+): ParseResult<string> {
+  const result = reviewCommentSchema.safeParse(typeof input === "string" ? input : "");
+  if (!result.success) {
+    return { ok: false, error: firstError(result.error, "Check the comment.") };
+  }
+  if (required && !result.data) {
+    return { ok: false, error: "Write a comment first." };
+  }
+  return { ok: true, data: result.data };
+}

@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // The old /projects pages moved into the portal (Active Research / My
+  // Research). Temporary redirects keep old links working.
+  async redirects() {
+    return [
+      { source: "/projects", destination: "/portal/active-research", permanent: false },
+      { source: "/projects/new", destination: "/portal/active-research/new", permanent: false },
+      { source: "/projects/:id/edit", destination: "/portal/my-research/:id", permanent: false },
+      { source: "/projects/:id", destination: "/portal/active-research/:id", permanent: false },
+    ];
+  },
   images: {
     remotePatterns: supabaseHost
       ? [{ protocol: "https", hostname: supabaseHost }]

@@ -145,11 +145,37 @@ export interface PaperDraft {
   version: number;
   pdf_storage_path: string | null;
   latex_url: string | null;
+  stage?: DraftStage | null;
   status: PaperStatus;
   published_at: string | null;
   created_at: string;
   updated_at: string;
   project?: Project | null;
+}
+
+/** The document types a project's PDF can be submitted as. */
+export type DraftStage = Extract<
+  DocumentType,
+  "whitepaper" | "project_status_paper" | "working_paper" | "research_paper"
+>;
+
+export type ProjectEventKind =
+  | "submitted"
+  | "approved"
+  | "denied"
+  | "comment"
+  | "reopened";
+
+export interface ProjectReviewEvent {
+  id: string;
+  project_id: string;
+  actor_id: string | null;
+  kind: ProjectEventKind;
+  body: string | null;
+  draft_version: number | null;
+  stage: DocumentType | null;
+  created_at: string;
+  actor?: Pick<Profile, "id" | "full_name" | "username"> | null;
 }
 
 export interface PeerReview {
